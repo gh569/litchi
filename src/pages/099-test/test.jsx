@@ -7,7 +7,8 @@ export default function Test(){
 	useEffect(()=>{
 		async function loadHello() {
 		  try {
-		    const res = await fetch("http://localhost:8787/api/hello");
+				// const origin=location.origin
+		    const res = await fetch(`/api/hello`);
 		
 		    if (!res.ok) {
 		      console.error("状态码错误", res.status);
