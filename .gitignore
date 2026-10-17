@@ -6,5 +6,5 @@ unpackage/
 .DS_Store
 .hbuilderx/
 .debugTemp/
-.wrangler/**
-" " 
+.wrangler
+
