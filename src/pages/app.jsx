@@ -22,7 +22,7 @@ export default function App() {
 
   return (
     <div>
-      <h1>股票</h1>
+      <h1>股票11</h1>
 
       <div>
         {STOCKS.map((s) => (
