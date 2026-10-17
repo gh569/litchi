@@ -1,27 +1,19 @@
-// src/pages/index/app.jsx
-import routes from "~pages";
-import { Router, Route, Switch } from "wouter-preact";
-import { setRouterMode } from "@utils/router-mode";
-import { useHashLocation } from "wouter-preact/use-hash-location";
-import "./app.css";
+import { useState } from 'preact/hooks'
 
+export default function App() {
+  const [user, setUser] = useState(null)
 
-/**
- * 主路由组件，渲染所有路由
- */
+  const fetchUser = async () => {
+    const res = await fetch('/api/user')
+    const data = await res.json()
+    setUser(data.data)
+  }
 
-setRouterMode('history')
-const App = () => {
   return (
-    <Router >
-      <Switch>
-        {routes.map(({name,path,component}) => {
-          return <Route key={name} path={path} component={component} />;
-        })}
-        <Route default component={() => <div role="alert">404 - 页面未找到</div>} />
-      </Switch>
-    </Router>
-  );
-};
-
-export default App;
+    <div>
+      <h1>Preact + Cloudflare</h1>
+      <button onClick={fetchUser}>获取用户</button>
+      {user && <pre>{JSON.stringify(user, null, 2)}</pre>}
+    </div>
+  )
+}
