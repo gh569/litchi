@@ -54,16 +54,20 @@ export default function StockQuote({ code }) {
   const trend = Number(data?.changePercent)
   const trendColor = trend > 0 ? '#e03131' : trend < 0 ? '#2f9e44' : '#333'
 
+  // 数据是否有效：核心字段（最新价/代码/名称）必须有值才算有效行情
+  const hasValid = data && data.price != null && data.price !== '-' && data.code != null
+
   return (
     <div>
       <h2 style={{ fontSize: 18, margin: '14px 0 8px' }}>
-        东方财富行情 {data ? `· ${data.name} (${data.code})` : ''}
+        东方财富行情
+        {data?.name ? ` · ${data.name}${data.code ? ` (${data.code})` : ''}` : ''}
       </h2>
 
       {loading && <p>查询中...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      {data && (
+      {data && hasValid && (
         <div>
           <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>
             数据来源：{data.source === 'tencent' ? '腾讯行情（东方财富不可用）' : '东方财富'}
@@ -92,6 +96,8 @@ export default function StockQuote({ code }) {
           </div>
         </div>
       )}
+
+      {data && !hasValid && <p style={{ color: '#c0392b' }}>东方财富暂无有效行情，正在切换数据源…</p>}
     </div>
   )
 }

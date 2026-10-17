@@ -7,8 +7,8 @@ import https from 'node:https'
 import dns from 'node:dns'
 import { readFile } from 'node:fs/promises'
 import { join, extname, normalize } from 'node:path'
-import { onRequestGet as quoteGet } from './functions/api/stock/[quote].js'
-import { onRequestGet as klineGet } from './functions/api/stock/[kline].js'
+import { onRequestGet as quoteGet } from './functions/api/stock/quote.js'
+import { onRequestGet as klineGet } from './functions/api/stock/kline.js'
 
 // 强制走 IPv4 的 fetch 实现。
 // 原因：Node 默认 fetch（undici）走 Happy Eyeballs，常优先 IPv6；
