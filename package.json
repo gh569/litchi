@@ -4,10 +4,10 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"dev": "node preview-server.mjs",
 		"build": "vite build",
 		"preview": "vite preview",
-		"deploy": "npm run build && wrangler deploy"
+		"deploy": "npm run build && npx wrangler pages deploy"
 	},
 	"dependencies": {
 		"@preact/signals": "^2.0.4",
@@ -16,7 +16,6 @@
 		"wouter-preact": "^3.13.0"
 	},
 	"devDependencies": {
-		"@cloudflare/vite-plugin": "^1.64.0",
 		"@preact/preset-vite": "^2.10.6",
 		"vite": "^6.2.4",
 		"wrangler": "^4.149.0"

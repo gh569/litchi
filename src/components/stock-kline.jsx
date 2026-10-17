@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import * as echarts from 'echarts/core'
 import { CandlestickChart, LineChart } from 'echarts/charts'
 import {
@@ -22,11 +22,15 @@ echarts.use([
 export default function StockKline({ code }) {
   const containerRef = useRef(null)
   const chartRef = useRef(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (!code || !containerRef.current) return
 
     let disposed = false
+    setLoading(true)
+    setError('')
 
     async function load() {
       try {
@@ -35,7 +39,10 @@ export default function StockKline({ code }) {
 
         if (disposed) return
 
-        if (json.code !== 200 || !json.data?.length) return
+        if (json.code !== 200 || !json.data?.length) {
+          setError(json.message || '未获取到K线数据')
+          return
+        }
 
         const data = json.data
 
@@ -87,7 +94,9 @@ export default function StockKline({ code }) {
           ]
         })
       } catch {
-        // 忽略错误
+        if (!disposed) setError('K线数据请求失败')
+      } finally {
+        if (!disposed) setLoading(false)
       }
     }
 
@@ -103,10 +112,14 @@ export default function StockKline({ code }) {
   }, [code])
 
   return (
-    <div
-      ref={containerRef}
-      style={{ width: '100%', height: 420 }}
-    />
+    <div>
+      {loading && <p>K线加载中...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <div
+        ref={containerRef}
+        style={{ width: '100%', height: 420 }}
+      />
+    </div>
   )
 }
 
