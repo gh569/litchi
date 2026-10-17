@@ -54,12 +54,22 @@ function toTencentCode(c) {
 }
 
 // 东方财富：日K(klt=101) 周K(102) 月K(103)
+// 关键：kline/get 是 JSONP 接口，必须带 cb 回调参数伪装成网页请求，否则东财 WAF 返回空响应
 async function fromEastmoney(secid, klt, lmt) {
-  const api = `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${secid}&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=${klt}&fqt=1&lmt=${lmt}&beg=0&end=20500101`;
+  const cb = `jQuery${Date.now()}_${Math.floor(Math.random() * 1e5)}`;
+  const api = `https://push2his.eastmoney.com/api/qt/stock/kline/get?secid=${secid}&fields1=f1,f2,f3,f4,f5,f6&fields2=f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61&klt=${klt}&fqt=1&lmt=${lmt}&beg=0&end=20500101&cb=${cb}`;
   const text = await fetchWithRetry([api], BROWSER_HEADERS);
   if (text == null) return null;
   let json;
-  try { json = JSON.parse(text); } catch (_) { return null; }
+  try {
+    const t = String(text).trim();
+    // 东财返回 JSONP：`cb({...})`，剥掉包裹再解析
+    if (t.startsWith(cb + "(") && t.endsWith(")")) {
+      json = JSON.parse(t.slice(cb.length + 1, -1));
+    } else {
+      json = JSON.parse(t);
+    }
+  } catch (_) { return null; }
   if (!json.data || !json.data.klines) return null;
   return json.data.klines.map((line) => {
     const [date, open, close, high, low, volume, amount, amplitude, changePercent, changeAmount, turnover] = line.split(',');
