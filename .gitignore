@@ -1,3 +1,4 @@
+.wrangler
 node_modules/
 dist/
 test/
@@ -6,5 +7,4 @@ unpackage/
 .DS_Store
 .hbuilderx/
 .debugTemp/
-.wrangler
 
