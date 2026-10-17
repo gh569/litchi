@@ -99,27 +99,50 @@ export async function onRequestGet({ request }) {
   const klt = url.searchParams.get('klt') || '101';
   const lmt = url.searchParams.get('lmt') || '120';
 
+  // 缓存降频：同一请求 30 秒内只回源一次，降低被东财限流的概率
+  let cache = null;
+  try { cache = typeof caches !== 'undefined' ? caches.default : null; } catch (_) { cache = null; }
+  const cacheKey = cache ? new Request(`https://stock.local/api/kline?code=${encodeURIComponent(code)}&klt=${klt}&lmt=${lmt}`) : null;
+  if (cache && cacheKey) {
+    try {
+      const hit = await cache.match(cacheKey);
+      if (hit) {
+        return new Response(hit.body, { headers: { 'Content-Type': 'application/json' } });
+      }
+    } catch (_) { /* 忽略 */ }
+  }
+
   const secid = toEastmoneySecid(code);
   const tcode = toTencentCode(code);
   if (!secid && !tcode) {
     return new Response(JSON.stringify({ code: 400, message: 'code 不支持，示例：600519.SH / 00700.HK' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
 
+  let body;
+
   // 东方财富主源
   if (secid) {
     try {
       const klines = await fromEastmoney(secid, klt, lmt);
-      if (klines) {
-        return new Response(JSON.stringify({ code: 200, source: 'eastmoney', data: klines }), { headers: { 'Content-Type': 'application/json' } });
-      }
+      if (klines) body = { code: 200, source: 'eastmoney', data: klines };
     } catch (_) { /* 回退腾讯 */ }
   }
 
   // 腾讯兜底
-  const tk = await fromTencent(code, klt, lmt);
-  if (tk) {
-    return new Response(JSON.stringify({ code: 200, source: 'tencent', data: tk }), { headers: { 'Content-Type': 'application/json' } });
+  if (!body) {
+    const tk = await fromTencent(code, klt, lmt);
+    if (tk) body = { code: 200, source: 'tencent', data: tk };
   }
 
-  return new Response(JSON.stringify({ code: 502, message: '东方财富与腾讯K线均请求失败' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  if (!body) {
+    return new Response(JSON.stringify({ code: 502, message: '东方财富与腾讯K线均请求失败' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  const resp = new Response(JSON.stringify(body), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=30' },
+  });
+  if (cache && cacheKey) {
+    try { await cache.put(cacheKey, resp.clone()); } catch (_) { /* 忽略 */ }
+  }
+  return resp;
 }

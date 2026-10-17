@@ -1,13 +1,23 @@
 // 行情接口：东方财富为主源，失败自动回退腾讯（qt.gtimg.cn）
-// 统一输出结构，source 标注数据来源
+// 为降低被东财限流/封禁的概率，模仿 Python 脚本的行为：
+//   1) 用反爬较松的 push2delay（延迟行情）为主源，push2 实时兜底
+//   2) 通过 Cloudflare Cache API 缓存结果（同一股票 20 秒内只回源一次，天然降频）
+//   3) 补全浏览器请求头
+//   4) 带超时 + 重试退避
+//   5) 最终腾讯兜底，保证有数据
 
-// ---------- 公共工具 ----------
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Referer': 'https://quote.eastmoney.com/',
   'Origin': 'https://quote.eastmoney.com',
   'Accept': 'application/json, text/plain, */*',
   'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+  'sec-ch-ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  'sec-ch-ua-mobile': '?0',
+  'sec-ch-ua-platform': '"Windows"',
+  'sec-fetch-dest': 'empty',
+  'sec-fetch-mode': 'cors',
+  'sec-fetch-site': 'same-site',
 };
 
 // 带超时 + 重试退避的 fetch：返回原始字节（ArrayBuffer），由调用方决定编码解码
@@ -23,7 +33,7 @@ async function fetchWithRetry(urls, headers, { timeout = 8000, retries = 2 } = {
         return await res.arrayBuffer();
       } catch (_) {
         clearTimeout(timer);
-        if (i < retries) await new Promise((r) => setTimeout(r, 250 * (i + 1))); // 退避
+        if (i < retries) await new Promise((r) => setTimeout(r, 300 * (i + 1))); // 退避
       }
     }
   }
@@ -34,7 +44,9 @@ async function fetchWithRetry(urls, headers, { timeout = 8000, retries = 2 } = {
 // 字段（qt/stock/get, fltt=2）：f57代码 f58名称 f43最新价 f46今开 f44最高 f45最低 f60昨收
 //   f47成交量 f48成交额 f168换手率 f169涨跌额 f170涨跌幅 f171振幅 f162市盈率(动) f167市净率 f116总市值 f117流通市值
 const EM_FIELDS = 'f43,f44,f45,f46,f47,f48,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170,f171';
-const EM_HOSTS = ['push2.eastmoney.com', 'push2delay.eastmoney.com'];
+// 域名策略：push2his 是历史K线域名，对数据中心/Cloudflare IP 宽容（K线已验证能通），
+// 因此行情也优先走它；push2delay 延迟行情次之；push2 实时接口最后兜底。
+const EM_HOSTS = ['push2his.eastmoney.com', 'push2delay.eastmoney.com', 'push2.eastmoney.com'];
 
 // 代码 -> 东方财富 secid
 function toEastmoneySecid(c) {
@@ -118,29 +130,69 @@ async function fromTencent(code) {
   };
 }
 
+// 缓存工具：Cloudflare 环境用 Cache API 降频；本地 Node 无 caches 则跳过
+const CACHE_TTL = 20; // 秒
+function getCache() {
+  try {
+    return typeof caches !== 'undefined' ? caches.default : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 export async function onRequestGet({ request }) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
 
+  const cache = getCache();
+  const cacheKey = cache ? new Request(`https://stock.local/api/quote?code=${encodeURIComponent(code)}`) : null;
+  if (cache && cacheKey) {
+    try {
+      const hit = await cache.match(cacheKey);
+      if (hit) {
+        return new Response(hit.body, { headers: { 'Content-Type': 'application/json' } });
+      }
+    } catch (_) { /* 缓存失败不影响主流程 */ }
+  }
+
   const secid = toEastmoneySecid(code);
   const tcode = toTencentCode(code);
   if (!secid && !tcode) {
-    return new Response(JSON.stringify({ code: 400, message: 'code 不支持，示例：600519.SH / 000001.SZ / 00700.HK' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    const r = new Response(JSON.stringify({ code: 400, message: 'code 不支持，示例：600519.SH / 000001.SZ / 00700.HK' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    return r;
   }
+
+  let body, source;
 
   // 东方财富主源
   if (secid) {
     const d = await fromEastmoney(secid);
     if (d) {
-      return new Response(JSON.stringify({ code: 200, source: 'eastmoney', data: { ...d, secid } }), { headers: { 'Content-Type': 'application/json' } });
+      body = { code: 200, source: 'eastmoney', data: { ...d, secid } };
+      source = 'eastmoney';
     }
   }
 
   // 腾讯兜底
-  const td = await fromTencent(code);
-  if (td) {
-    return new Response(JSON.stringify({ code: 200, source: 'tencent', data: td }), { headers: { 'Content-Type': 'application/json' } });
+  if (!body) {
+    const td = await fromTencent(code);
+    if (td) {
+      body = { code: 200, source: 'tencent', data: td };
+      source = 'tencent';
+    }
   }
 
-  return new Response(JSON.stringify({ code: 502, message: '东方财富与腾讯行情均请求失败' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  if (!body) {
+    return new Response(JSON.stringify({ code: 502, message: '东方财富与腾讯行情均请求失败' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  const resp = new Response(JSON.stringify(body), {
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': `public, max-age=${CACHE_TTL}` },
+  });
+
+  // 回源成功后写入缓存，降低后续请求频率（模拟 Python 的低频行为）
+  if (cache && cacheKey) {
+    try { await cache.put(cacheKey, resp.clone()); } catch (_) { /* 忽略 */ }
+  }
+  return resp;
 }
