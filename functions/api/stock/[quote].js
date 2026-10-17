@@ -1,17 +1,40 @@
 // 行情接口：东方财富为主源，失败自动回退腾讯（qt.gtimg.cn）
 // 统一输出结构，source 标注数据来源
 
-// ---------- 东方财富 ----------
-// 字段（qt/stock/get, fltt=2）：f57代码 f58名称 f43最新价 f46今开 f44最高 f45最低 f60昨收
-//   f47成交量 f48成交额 f168换手率 f169涨跌额 f170涨跌幅 f171振幅 f162市盈率(动) f167市净率 f116总市值 f117流通市值
-const EM_FIELDS = 'f43,f44,f45,f46,f47,f48,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170,f171';
-const EM_HOSTS = ['push2.eastmoney.com', 'push2delay.eastmoney.com'];
+// ---------- 公共工具 ----------
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
   'Referer': 'https://quote.eastmoney.com/',
   'Origin': 'https://quote.eastmoney.com',
   'Accept': 'application/json, text/plain, */*',
+  'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
 };
+
+// 带超时 + 重试退避的 fetch：降低东财限流/连接重置导致的失败
+async function fetchWithRetry(urls, headers, { timeout = 8000, retries = 2 } = {}) {
+  for (const url of urls) {
+    for (let i = 0; i <= retries; i++) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), timeout);
+      try {
+        const res = await fetch(url, { headers, signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!res.ok) continue;
+        return await res.text();
+      } catch (_) {
+        clearTimeout(timer);
+        if (i < retries) await new Promise((r) => setTimeout(r, 250 * (i + 1))); // 退避
+      }
+    }
+  }
+  return null;
+}
+
+// ---------- 东方财富 ----------
+// 字段（qt/stock/get, fltt=2）：f57代码 f58名称 f43最新价 f46今开 f44最高 f45最低 f60昨收
+//   f47成交量 f48成交额 f168换手率 f169涨跌额 f170涨跌幅 f171振幅 f162市盈率(动) f167市净率 f116总市值 f117流通市值
+const EM_FIELDS = 'f43,f44,f45,f46,f47,f48,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170,f171';
+const EM_HOSTS = ['push2.eastmoney.com', 'push2delay.eastmoney.com'];
 
 // 代码 -> 东方财富 secid
 function toEastmoneySecid(c) {
@@ -26,29 +49,26 @@ function toEastmoneySecid(c) {
 }
 
 async function fromEastmoney(secid) {
-  for (const host of EM_HOSTS) {
-    try {
-      const api = `https://${host}/api/qt/stock/get?secid=${secid}&fields=${EM_FIELDS}&fltt=2&invt=2`;
-      const res = await fetch(api, { headers: BROWSER_HEADERS });
-      if (!res.ok) continue;
-      const j = await res.json();
-      if (!j.data) continue;
-      const d = j.data;
-      return {
-        code: d.f57, name: d.f58, price: d.f43, open: d.f46, high: d.f44, low: d.f45, close: d.f60,
-        volume: d.f47, amount: d.f48, changePercent: d.f170, changeAmount: d.f169,
-        turnoverRate: d.f168, amplitude: d.f171, pe: d.f162, pb: d.f167,
-        totalMarketValue: d.f116, circulatingMarketValue: d.f117,
-      };
-    } catch (_) { /* 换下一个域名 */ }
-  }
-  return null;
+  const urls = EM_HOSTS.map((h) => `https://${h}/api/qt/stock/get?secid=${secid}&fields=${EM_FIELDS}&fltt=2&invt=2`);
+  const text = await fetchWithRetry(urls, BROWSER_HEADERS);
+  if (text == null) return null;
+  let j;
+  try { j = JSON.parse(text); } catch (_) { return null; }
+  if (!j || !j.data) return null;
+  const d = j.data;
+  // 东财限流/停牌/异常时可能返回 data 存在但字段为空，此时视为无效，交给腾讯兜底
+  if (d.f43 == null || d.f43 === '-' || d.f57 == null) return null;
+  return {
+    code: d.f57, name: d.f58, price: d.f43, open: d.f46, high: d.f44, low: d.f45, close: d.f60,
+    volume: d.f47, amount: d.f48, changePercent: d.f170, changeAmount: d.f169,
+    turnoverRate: d.f168, amplitude: d.f171, pe: d.f162, pb: d.f167,
+    totalMarketValue: d.f116, circulatingMarketValue: d.f117,
+  };
 }
 
 // ---------- 腾讯兜底 ----------
-// 接口 qt.gtimg.cn/q=前缀+代码，返回 GBK 编码的 "v_xxx=\"...\""，字段用 ~ 分隔
-// 字段索引：1名称 2代码 3最新价 4昨收 5今开 6成交量(手) 31涨跌额 32涨跌幅 33最高 34最低
-//          37成交额(万) 38换手率 39市盈率 43振幅 44流通市值(亿) 45总市值(亿) 46市净率
+// 接口 qt.gtimg.cn/q=前缀+代码，返回 GBK 编码 "v_xxx=\"...\""，字段用 ~ 分隔
+// 索引：1名称 2代码 3最新价 4昨收 5今开 6成交量 31涨跌额 32涨跌幅 33最高 34最低 37成交额(万) 38换手率 39市盈率 43振幅 44流通市值(亿) 45总市值(亿) 46市净率
 function toTencentCode(c) {
   if (!c) return null;
   const u = String(c).toUpperCase().trim();
@@ -70,33 +90,24 @@ const num = (v) => {
 async function fromTencent(code) {
   const q = toTencentCode(code);
   if (!q) return null;
-  try {
-    const res = await fetch(`https://qt.gtimg.cn/q=${q}`, {
-      headers: { 'User-Agent': BROWSER_HEADERS['User-Agent'], 'Referer': 'https://gu.qq.com/' },
-    });
-    if (!res.ok) return null;
-    // 腾讯返回 GBK；workerd/Node 均支持 gbk，失败时退回 UTF-8
-    let text;
-    try {
-      text = new TextDecoder('gbk').decode(await res.arrayBuffer());
-    } catch (_) {
-      text = await res.text();
-    }
-    const m = text.match(/="(.*)"/);
-    if (!m) return null;
-    const p = m[1].split('~');
-    if (p.length < 47) return null;
-    return {
-      code: p[2], name: p[1], price: num(p[3]), open: num(p[5]), high: num(p[33]), low: num(p[34]), close: num(p[4]),
-      volume: num(p[6]), amount: num(p[37]) != null ? num(p[37]) * 10000 : null,
-      changePercent: num(p[32]), changeAmount: num(p[31]),
-      turnoverRate: num(p[38]), amplitude: num(p[43]), pe: num(p[39]), pb: num(p[46]),
-      totalMarketValue: num(p[45]) != null ? num(p[45]) * 1e8 : null,
-      circulatingMarketValue: num(p[44]) != null ? num(p[44]) * 1e8 : null,
-    };
-  } catch (_) {
-    return null;
-  }
+  const urls = [`https://qt.gtimg.cn/q=${q}`];
+  const text = await fetchWithRetry(urls, {
+    'User-Agent': BROWSER_HEADERS['User-Agent'],
+    'Referer': 'https://gu.qq.com/',
+  }, { timeout: 6000, retries: 1 });
+  if (text == null) return null;
+  const m = text.match(/="(.*)"/);
+  if (!m) return null;
+  const p = m[1].split('~');
+  if (p.length < 47) return null;
+  return {
+    code: p[2], name: p[1], price: num(p[3]), open: num(p[5]), high: num(p[33]), low: num(p[34]), close: num(p[4]),
+    volume: num(p[6]), amount: num(p[37]) != null ? num(p[37]) * 10000 : null,
+    changePercent: num(p[32]), changeAmount: num(p[31]),
+    turnoverRate: num(p[38]), amplitude: num(p[43]), pe: num(p[39]), pb: num(p[46]),
+    totalMarketValue: num(p[45]) != null ? num(p[45]) * 1e8 : null,
+    circulatingMarketValue: num(p[44]) != null ? num(p[44]) * 1e8 : null,
+  };
 }
 
 export async function onRequestGet({ request }) {
