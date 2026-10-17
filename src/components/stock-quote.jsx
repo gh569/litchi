@@ -5,6 +5,18 @@ function fmt(v, unit) {
   return (typeof v === 'number' ? Number(v).toLocaleString('zh-CN') : v) + (unit || '')
 }
 
+// 单个指标卡片：标签 + 值
+function Metric({ label, value, unit, color }) {
+  return (
+    <div style={{ background: '#f7f8fa', borderRadius: 6, padding: '8px 10px', minWidth: 0 }}>
+      <div style={{ fontSize: 11, color: '#999', marginBottom: 2 }}>{label}</div>
+      <div style={{ fontSize: 16, fontWeight: 600, color: color || '#222', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        {fmt(value, unit)}
+      </div>
+    </div>
+  )
+}
+
 export default function StockQuote({ code }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -44,41 +56,41 @@ export default function StockQuote({ code }) {
 
   return (
     <div>
-      <h2>东方财富行情 {data ? `· ${data.name} (${data.code})` : ''}</h2>
+      <h2 style={{ fontSize: 18, margin: '14px 0 8px' }}>
+        东方财富行情 {data ? `· ${data.name} (${data.code})` : ''}
+      </h2>
 
       {loading && <p>查询中...</p>}
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {data && (
-        <div style={{ fontSize: 13, color: '#888', marginBottom: 6 }}>
-          数据来源：{data.source === 'tencent' ? '腾讯行情（东方财富不可用）' : '东方财富'}
-        </div>
-      )}
+        <div>
+          <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>
+            数据来源：{data.source === 'tencent' ? '腾讯行情（东方财富不可用）' : '东方财富'}
+          </div>
 
-      {data && (
-        <table border="1" cellPadding="8">
-          <tbody>
-            <tr><td>最新价</td><td style={{ color: trendColor, fontWeight: 'bold' }}>{fmt(data.price)}</td></tr>
-            <tr>
-              <td>涨跌幅</td>
-              <td style={{ color: trendColor }}>
-                {fmt(data.changePercent, '%')}（{data.changeAmount != null && Number(data.changeAmount) > 0 ? '+' : ''}{fmt(data.changeAmount)}）
-              </td>
-            </tr>
-            <tr><td>今开</td><td>{fmt(data.open)}</td></tr>
-            <tr><td>最高</td><td>{fmt(data.high)}</td></tr>
-            <tr><td>最低</td><td>{fmt(data.low)}</td></tr>
-            <tr><td>昨收</td><td>{fmt(data.close)}</td></tr>
-            <tr><td>成交量</td><td>{fmt(data.volume)}</td></tr>
-            <tr><td>成交额</td><td>{fmt(data.amount)}</td></tr>
-            <tr><td>换手率</td><td>{fmt(data.turnoverRate, '%')}</td></tr>
-            <tr><td>振幅</td><td>{fmt(data.amplitude, '%')}</td></tr>
-            <tr><td>市盈率(动)</td><td>{fmt(data.pe)}</td></tr>
-            <tr><td>市净率</td><td>{fmt(data.pb)}</td></tr>
-            <tr><td>总市值</td><td>{fmt(data.totalMarketValue)}</td></tr>
-            <tr><td>流通市值</td><td>{fmt(data.circulatingMarketValue)}</td></tr>
-          </tbody>
-        </table>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+            gap: 8,
+          }}>
+            <Metric label="最新价" value={data.price} color={trendColor} />
+            <Metric label="涨跌幅" value={data.changePercent} unit="%" color={trendColor} />
+            <Metric label="涨跌额" value={data.changeAmount} color={trendColor} />
+            <Metric label="今开" value={data.open} />
+            <Metric label="最高" value={data.high} color={trendColor} />
+            <Metric label="最低" value={data.low} color={trendColor} />
+            <Metric label="昨收" value={data.close} />
+            <Metric label="成交量" value={data.volume} />
+            <Metric label="成交额" value={data.amount} />
+            <Metric label="换手率" value={data.turnoverRate} unit="%" />
+            <Metric label="振幅" value={data.amplitude} unit="%" />
+            <Metric label="市盈率(动)" value={data.pe} />
+            <Metric label="市净率" value={data.pb} />
+            <Metric label="总市值" value={data.totalMarketValue} />
+            <Metric label="流通市值" value={data.circulatingMarketValue} />
+          </div>
+        </div>
       )}
     </div>
   )

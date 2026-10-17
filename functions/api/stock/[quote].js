@@ -10,7 +10,7 @@ const BROWSER_HEADERS = {
   'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
 };
 
-// 带超时 + 重试退避的 fetch：降低东财限流/连接重置导致的失败
+// 带超时 + 重试退避的 fetch：返回原始字节（ArrayBuffer），由调用方决定编码解码
 async function fetchWithRetry(urls, headers, { timeout = 8000, retries = 2 } = {}) {
   for (const url of urls) {
     for (let i = 0; i <= retries; i++) {
@@ -20,7 +20,7 @@ async function fetchWithRetry(urls, headers, { timeout = 8000, retries = 2 } = {
         const res = await fetch(url, { headers, signal: ctrl.signal });
         clearTimeout(timer);
         if (!res.ok) continue;
-        return await res.text();
+        return await res.arrayBuffer();
       } catch (_) {
         clearTimeout(timer);
         if (i < retries) await new Promise((r) => setTimeout(r, 250 * (i + 1))); // 退避
@@ -50,10 +50,10 @@ function toEastmoneySecid(c) {
 
 async function fromEastmoney(secid) {
   const urls = EM_HOSTS.map((h) => `https://${h}/api/qt/stock/get?secid=${secid}&fields=${EM_FIELDS}&fltt=2&invt=2`);
-  const text = await fetchWithRetry(urls, BROWSER_HEADERS);
-  if (text == null) return null;
+  const buf = await fetchWithRetry(urls, BROWSER_HEADERS);
+  if (buf == null) return null;
   let j;
-  try { j = JSON.parse(text); } catch (_) { return null; }
+  try { j = JSON.parse(new TextDecoder('utf-8').decode(buf)); } catch (_) { return null; }
   if (!j || !j.data) return null;
   const d = j.data;
   // 东财限流/停牌/异常时可能返回 data 存在但字段为空，此时视为无效，交给腾讯兜底
@@ -91,11 +91,19 @@ async function fromTencent(code) {
   const q = toTencentCode(code);
   if (!q) return null;
   const urls = [`https://qt.gtimg.cn/q=${q}`];
-  const text = await fetchWithRetry(urls, {
+  const buf = await fetchWithRetry(urls, {
     'User-Agent': BROWSER_HEADERS['User-Agent'],
     'Referer': 'https://gu.qq.com/',
   }, { timeout: 6000, retries: 1 });
-  if (text == null) return null;
+  if (buf == null) return null;
+  // 腾讯返回 GBK，用 gbk 解码；若结果出现乱码符 U+FFFD 则退回 UTF-8
+  let text;
+  try {
+    text = new TextDecoder('gbk').decode(buf);
+    if (text.includes('\uFFFD')) throw new Error('gbk-bad');
+  } catch (_) {
+    text = new TextDecoder('utf-8').decode(buf);
+  }
   const m = text.match(/="(.*)"/);
   if (!m) return null;
   const p = m[1].split('~');
