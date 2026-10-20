@@ -5,7 +5,6 @@
 	"type": "module",
 	"scripts": {
 		"dev": "npx wrangler pages dev dist",
-		"dev:node":"node preview-server.mjs",
 		"build": "vite build",
 		"preview": "vite preview",
 		"deploy": "npm run build && npx wrangler pages deploy"

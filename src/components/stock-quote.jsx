@@ -21,6 +21,7 @@ export default function StockQuote({ code }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [data, setData] = useState(null)
+  const [source, setSource] = useState('')
 
   useEffect(() => {
     if (!code) return
@@ -39,6 +40,7 @@ export default function StockQuote({ code }) {
           return
         }
         setData(json.data)
+        setSource(json.source || '')
       } catch (err) {
         if (!disposed) setError('请求失败')
       } finally {
@@ -60,7 +62,7 @@ export default function StockQuote({ code }) {
   return (
     <div>
       <h2 style={{ fontSize: 18, margin: '14px 0 8px' }}>
-        东方财富行情
+        股票行情
         {data?.name ? ` · ${data.name}${data.code ? ` (${data.code})` : ''}` : ''}
       </h2>
 
@@ -70,7 +72,7 @@ export default function StockQuote({ code }) {
       {data && hasValid && (
         <div>
           <div style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>
-            数据来源：{data.source === 'tencent' ? '腾讯行情（东方财富不可用）' : '东方财富'}
+            数据来源：{source === 'eastmoney' ? '东方财富' : source === 'tencent' ? '腾讯' : source || '未知'}
           </div>
 
           <div style={{
@@ -97,7 +99,7 @@ export default function StockQuote({ code }) {
         </div>
       )}
 
-      {data && !hasValid && <p style={{ color: '#c0392b' }}>东方财富暂无有效行情，正在切换数据源…</p>}
+      {data && !hasValid && <p style={{ color: '#c0392b' }}>暂无有效行情，正在切换数据源…</p>}
     </div>
   )
 }
