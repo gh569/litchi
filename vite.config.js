@@ -15,11 +15,20 @@ const sharedAlias = {
 export default defineConfig(({ command, mode }) => {
 	const env = loadEnv(mode, process.cwd(), "VITE_");
 
-	
+	// 开发模式：前端 vite dev(5173) + 后端 wrangler functions(8787)
+	// 通过 proxy 把 /api 转发到 wrangler，改源码即时热更新，不构建产物
+	const proxyTarget = 'http://localhost:8787';
 
 	return {
 		base: "./",
-		
+		server: {
+			proxy: {
+				'/api': {
+					target: proxyTarget,
+					changeOrigin: true,
+				}
+			}
+		},
 		plugins: [
 			
 			preact(),
