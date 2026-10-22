@@ -1,0 +1,15 @@
+.case-detail {
+	padding: 20px;
+}
+
+.case-header {
+	position: relative;
+	margin-bottom: 20px;
+}
+
+.case-title {
+	margin: 0 0 16px 0;
+	font-size: 24px;
+	color: #333;
+	line-height: 1.3;
+}

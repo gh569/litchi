@@ -1,0 +1,96 @@
+.header-placeholder {
+  visibility: hidden;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 10px 10px 0 0; /* 顶部圆角 */
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.table-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  width: 100%;
+  max-width: var(--max-width);
+  transition: all 0.3s ease;
+}
+
+.back-button {
+  margin-right: 16px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-title {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: white;
+}
+
+.header-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* 
+  关键修改：在 CSS Modules 中，类名会被哈希化（如 .header-actions_xxx），
+  但内部传入的 button 标签不会被哈希化。
+  因此需要使用 :global(button) 来选中原生的 button 标签。
+*/
+.header-actions :global(button) {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  min-width: auto;
+}
+
+.header-actions :global(button:hover) {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-actions :global(button:active) {
+  transform: translateY(0);
+}

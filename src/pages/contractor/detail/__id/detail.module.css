@@ -1,0 +1,21 @@
+.content-container {
+	min-height: 100vh;
+	padding: 12px 8px; /* 减小外层边距 */
+	background: linear-gradient(180deg, #f5f7fa 0%, #eef2f7 100%);
+	display: flex;
+	justify-content: center;
+}
+
+.content-card {
+	width: 100%;
+	max-width: 800px;
+	background: #ffffff;
+	border-radius: 12px; /* 微调圆角 */
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+	padding: 12px; /* 减小内层边距，扩大文字区域 */
+	min-height: 60vh;
+	display: flex;
+	flex-direction: column;
+	-webkit-user-select: text !important;
+	user-select: text;
+}

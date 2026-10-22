@@ -8,3 +8,4 @@ unpackage/
 .hbuilderx/
 .debugTemp/
 
+.dev.vars

@@ -1,5 +1,11 @@
 {
   "name": "litchi",
   "compatibility_date": "2026-10-17",
-  "pages_build_output_dir": "dist"
+  "pages_build_output_dir": "dist",
+  "kv_namespaces": [
+    {
+      "binding": "WPS_KV",
+      "id": "1e5aa317fd7744dc82aecdf6d2ff38c2"
+    }
+  ]
 }

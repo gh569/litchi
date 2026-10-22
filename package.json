@@ -12,9 +12,13 @@
 	},
 	"dependencies": {
 		"@preact/signals": "^2.0.4",
+		"antd-mobile": "^5.43.0",
 		"echarts": "^6.1.0",
+		"mammoth": "^1.13.0",
+		"pdfjs-dist": "^6.4.299",
 		"preact": "^10.26.4",
-		"wouter-preact": "^3.13.0"
+		"wouter-preact": "^3.13.0",
+		"xlsx": "^0.18.5"
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.10.6",

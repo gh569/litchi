@@ -1,0 +1,45 @@
+.pdf-canvas-scope {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: #e8e8e8;
+}
+.pdf-page {
+  display: block;
+  width: 100%;
+  background-color: #fff;
+  margin-bottom: 8px;
+}
+/* 未渲染页面的等高占位：先定型布局，滚动加载时不再撑开跳动 */
+.pdf-page-placeholder {
+  width: 100%;
+  background-color: #fff;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+.pdf-error {
+  padding: 24px 20px;
+  text-align: center;
+  color: #d32f2f;
+  font-size: 14px;
+}
+ .pdf-error-detail {
+  margin-top: 8px;
+  color: #999;
+  font-size: 12px;
+  word-break: break-all;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pdf-download {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 8px 24px;
+  border: 1px solid #1890ff;
+  border-radius: 4px;
+  color: #1890ff;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}

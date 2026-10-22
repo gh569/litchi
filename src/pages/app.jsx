@@ -13,7 +13,8 @@ const pages = import.meta.glob('./**/index.jsx', { eager: true, import: 'default
 const routes = Object.entries(pages).map(([file, Comp]) => {
   const rel = file.replace('./', '')
   const dir = rel.replace(/\/?index\.jsx$/, '')
-  const path = dir === '' ? '/' : '/' + dir
+  // __id 之类文件夹转成动态参数 :id（wouter 动态路由）
+  const path = dir === '' ? '/' : ('/' + dir).replace(/__(\w+)/g, ':$1')
   return { path, Comp }
 })
 

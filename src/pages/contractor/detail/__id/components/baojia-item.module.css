@@ -1,0 +1,134 @@
+/* 整体卡片容器 */
+.card-wrapper {
+	background: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	border: 1px solid #eaeaea;
+	margin-bottom: 12px;
+	overflow: hidden;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* 头部布局 */
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 12px;
+	border-bottom: 1px solid #f0f0f0;
+	background-color: #fafafa;
+}
+
+.title1 {
+	color: #1a1a1a;
+	font-weight: 600;
+	font-size: 16px;
+	white-space: normal; /* 允许换行 */
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin: 0;
+	flex: 1;
+	min-width: 0;
+	line-height: 1.4;
+	display: -webkit-box;
+	-webkit-line-clamp: 2; /* 限制为2行 */
+	-webkit-box-orient: vertical;
+}
+
+.header-right {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.time {
+	font-size: 11px;
+	color: #999;
+	font-style: italic;
+}
+
+.copy-button-container {
+	display: flex;
+	justify-content: flex-end;
+	width: 100%;
+}
+
+/* 复制按钮 */
+.btn-copy {
+	padding: 1px 10px;
+	font-size: 12px;
+	color: #4a90e2;
+	background-color: transparent;
+	border: 1px solid #4a90e2;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.btn-copy:hover {
+	background-color: #4a90e2;
+	color: #ffffff;
+}
+
+.btn-copy:active {
+	transform: scale(0.96);
+}
+
+/* 主体内容区 */
+.card-body {
+	padding: 12px 12px;
+}
+
+.case-content {
+	margin-bottom: 12px;
+	background-color: #f9f9f9;
+	border-radius: 6px;
+	padding: 10px 12px;
+}
+
+/* 文本截断与展示 */
+.text-clamp {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 6;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.content-text {
+	line-height: 1.6;
+	color: #444;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+	font-size: 14px;
+	transition: max-height 0.3s ease;
+}
+
+/* 折叠按钮区域 */
+.container-zhedie {
+	display: flex;
+	justify-content: center;
+	margin-top: 6px;
+}
+
+.zhedie-btn {
+	border: none;
+	background-color: transparent;
+	color: #888;
+	font-size: 12px;
+	padding: 4px 8px;
+	cursor: pointer;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+}
+
+.zhedie-btn:hover {
+	color: #4a90e2;
+	background-color: rgba(74, 144, 226, 0.1);
+}
+
+/* 附件区域微调 */
+.attachments-area {
+	margin-top: 8px;
+}

@@ -1,0 +1,80 @@
+.attachment-grid-wrapper {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr); /* 九宫格核心：3列等宽 */
+	gap: 10px;
+}
+
+.attachment-item {
+	display: flex;
+	flex-direction: column; /* 纵向排列：上图下文 */
+	align-items: center;
+	padding: 8px;
+	background-color: #ffffff;
+	border: 1px solid #f0f0f0;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.attachment-item:hover {
+	border-color: #e0e0e0;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+	transform: translateY(-2px);
+}
+
+.attachment-item:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* 图标样式 */
+.attachment-icon {
+	width: 100%;
+	aspect-ratio: 1 / 1; /* 保持 1:1 正方形 */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 8px;
+	position: relative;
+	background: linear-gradient(135deg, #e3f2fd, #ede7f6);
+	border-radius: 6px;
+	color: #5c6bc0;
+	font-weight: 600;
+}
+
+.file-ext-text {
+	font-size: 14px;
+	letter-spacing: -0.5px;
+	opacity: 0.9;
+}
+
+/* 信息区样式 */
+.attachment-info {
+	width: 100%;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center; /* 文字居中 */
+	gap: 2px;
+}
+
+.attachment-name {
+	font-size: 12px;
+	color: #333;
+	font-weight: 500;
+	/* 双行截断 */
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	word-break: break-all; /* 允许单词内断行，防止长文件名溢出 */
+	line-height: 1.3;
+	text-align: center;
+}
+
+.attachment-size {
+	font-size: 10px;
+	color: #999;
+}

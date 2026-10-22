@@ -1,0 +1,200 @@
+.excel-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+}
+
+.sheet-tabs {
+  display: flex;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e8e8e8;
+  overflow-x: auto;
+  padding: 0 20px;
+}
+
+.tab-button {
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+  transition: all 0.2s;
+  position: relative;
+  margin-right: 8px;
+  border-radius: 4px;
+}
+
+.tab-button:hover {
+  background-color: #f0f2f5;
+  color: #1890ff;
+}
+
+.active {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #1890ff;
+}
+
+.sheet-content {
+  flex: 1;
+  padding: 0;
+  overflow: auto;
+  max-height: calc(100vh - 50px);
+  background-color: #fff;
+}
+
+.sheet-content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.sheet-content::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.sheet-content::-webkit-scrollbar-thumb {
+  background: #c6cbd2;
+  border-radius: 4px;
+}
+
+.sheet-content::-webkit-scrollbar-thumb:hover {
+  background: #9aa1ab;
+}
+
+.sheet-content::-webkit-scrollbar-corner {
+  background: #f5f5f5;
+}
+
+
+/* ---- 网格表格样式（原 GRID_CSS 迁移：hash 类自带作用域，无需 .excel-grid-scope 前缀） ---- */
+.sheet-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  background-color: #fff;
+  font-size: 12px;
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Calibri, sans-serif;
+  color: #1f2329;
+}
+
+/* 单元格公共：边框、内边距、对齐 */
+.grid-cell {
+  border-right: 1px solid #dfe3e8;
+  border-bottom: 1px solid #dfe3e8;
+  padding: 2px 8px;
+  text-align: left;
+  font-weight: 400;
+  line-height: 1.5;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+/* 列标 / 行号：模拟表格软件灰色面板 */
+.col-head,
+.row-head {
+  background-color: #f5f6f7;
+  color: #7d8590;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  user-select: none;
+}
+.col-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-width: 56px;
+  border-bottom: 1px solid #cfd4da;
+}
+.row-head {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 16px;
+  border-right: 1px solid #cfd4da;
+}
+
+/* 左上角对角标记（模拟全选按钮） */
+.corner {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: 16px;
+  background-color: #eef0f2;
+  border-right: 1px solid #cfd4da;
+  border-bottom: 1px solid #cfd4da;
+}
+.corner::after {
+  content: '';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 8px 8px;
+  border-color: transparent transparent #bfc6cd transparent;
+}
+
+/* 数据单元格：紧凑、单行、超出省略 */
+.cell {
+  background-color: #fff;
+  min-width: 56px;
+  height: 24px;
+  transition: box-shadow 0.1s;
+}
+.cell:hover {
+  box-shadow: inset 0 0 0 2px #21a366;
+  position: relative;
+  z-index: 1;
+}
+
+/* 首行按表头呈现 */
+.cell-head {
+  font-weight: 600;
+  background-color: #fafbfc;
+  color: #17181a;
+}
+/* 数字右对齐、布尔居中 */
+.cell-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.cell-bool {
+  text-align: center;
+}
+.cell-empty {
+  color: #b4b9c0;
+}
+
+/* 行悬停高亮（后代选择器，类名部分 hash、元素部分稳定，可正常生效） */
+.sheet-table tbody tr:hover .cell {
+  background-color: #f0f7ff;
+}
+.sheet-table tbody tr:hover .row-head {
+  background-color: #e3effc;
+  color: #1890ff;
+}
+
+/* 空工作表 */
+.sheet-empty {
+  padding: 24px;
+  color: #8a9099;
+  font-size: 13px;
+}
