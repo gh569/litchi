@@ -29,7 +29,7 @@ export default defineConfig(({
 	const proxyTarget = 'http://localhost:8787';
 
 	return {
-		base: "./",
+		base: "/",
 		server: {
 			proxy: {
 				'/api': {

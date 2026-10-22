@@ -6,10 +6,21 @@ import style from './file-attachments.module.css';
 export default function ({ files }) {
 	const navigate = useNavigate();
 
-	const download = attachment => {
-		const queryParams = `?url=${encodeURIComponent(attachment.url)}&fileName=${encodeURIComponent(attachment.fileName)}`;
-
-		navigate('../../doc-viewer' + queryParams, { openInNewTab: true });
+	const download = async attachment => {
+		try {
+			const res = await fetch('/api/attachments', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ attachs: [attachment] }),
+			});
+			const list = await res.json();
+			const realUrl = Array.isArray(list) ? list[0]?.url : null;
+			if (!realUrl) throw new Error('未获取到文件链接');
+			const queryParams = `?url=${encodeURIComponent(realUrl)}&fileName=${encodeURIComponent(attachment.fileName)}`;
+			navigate('../../doc-viewer' + queryParams, { openInNewTab: true });
+		} catch (e) {
+			console.error('获取附件链接失败:', e);
+		}
 	};
 
 	// 提取文件后缀名用于展示
