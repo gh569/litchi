@@ -128,6 +128,10 @@ const PdfCanvasViewer = ({ data, onDownload, zoom = 1 }) => {
       canvas.width = Math.floor(viewport.width);
       canvas.height = Math.floor(viewport.height);
       canvas.className = style["pdf-page"];
+      // CSS 显示尺寸随 zoom 放大（canvas 内部分辨率是 dpr 倍，显示宽高要除以 dpr）
+      // 必须覆盖 module.css 里的 width:100%，否则内部分辨率提高但视觉不变
+      canvas.style.width = Math.round(viewport.width / dpr) + "px";
+      canvas.style.height = Math.round(viewport.height / dpr) + "px";
       const ctx = canvas.getContext("2d", { alpha: false });
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
