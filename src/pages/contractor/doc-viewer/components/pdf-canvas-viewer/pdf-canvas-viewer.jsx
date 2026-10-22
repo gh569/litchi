@@ -8,24 +8,14 @@ import style from "./pdf-canvas-viewer.module.css"
 import PdfJsWorker from "../pdf.worker.bundle.js?worker&iife";
 // 自建 worker 入口（内含 polyfill + 带 core-js 垫片的 legacy worker）。
 // 必须用 ?worker&iife 让 Vite 完整打包成独立线程文件：
-// 之前 ?url 方式是原样拷贝官方文件，polyfill 根本进不了 worker 全局，
-// 这就是上一轮改完仍报 "n.toHex is not a function" 的原因。
+// ?url 方式是原样拷贝官方文件，polyfill 根本进不了 worker 全局，
+// 这就是改完仍报 "n.toHex is not a function" 的原因。
 // iife 格式同时兼容不支持 module worker 的旧 WebView。
 
-/* ---------- PDF 预览（canvas 懒渲染版） ----------
- * 桌面端 iframe 依赖浏览器内置 PDF viewer，移动端（尤其微信 WebView）没有，
- * 只显示空白；这里用 pdfjs-dist 逐页渲染 canvas，任何支持 Canvas 的浏览器
- * 都能显示。
- *
- * 懒渲染策略（解决"整本一次渲染导致首屏慢、内容撑开反复跳动"）：
- * 1. 取每页宽高比，先铺等高的空白占位 div（滚动条/布局一次定型，不再跳动）；
- * 2. 第一页立即渲染，渲染完即撤加载提示——首屏时间 ≈ 第一页渲染时间；
- * 3. 其余页进视口附近（rootMargin 400px）才渲染，串行进队不打爆 worker；
- * 4. 无 IntersectionObserver 的旧内核退化为全量顺序渲染（等同旧行为）。
- *
- * 解析线程策略：每个文档创建一个自建 worker，经 PDFWorker({ port }) 接入，
- * 文档销毁后再 terminate；旧内核下若 worker 初始化失败，pdfjs 会回退
- * fake worker（主线程执行），由 ./pdf-polyfill 覆盖。
+/* ---------- PDF 预览（canvas 懒渲染版，支持缩放） ----------
+ * 缩放：传入 zoom prop（相对倍率，默认 1），渲染 scale 与占位高度都乘以 zoom。
+ * zoom 变化时不重开文档，直接重铺占位并重渲染可视页（清晰放大）。
+ * 懒渲染策略：铺等高占位 → 首页立即渲染 → 其余页进视口才渲染（串行队列）。
  */
 
 const openDoc = async (buffer) => {
@@ -69,120 +59,128 @@ const closeDoc = (doc) => {
   }
 };
 
-const PdfCanvasViewer = ({ data, onDownload }) => {
+const PdfCanvasViewer = ({ data, onDownload, zoom = 1 }) => {
   const containerRef = useRef(null);
   const runIdRef = useRef(0);
   const docRef = useRef(null);
+  const observerRef = useRef(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
   const [tip, setTip] = useState("PDF 加载中…");
   const [failed, setFailed] = useState(false);
   const [errMsg, setErrMsg] = useState("");
 
-  useEffect(() => {
-    if (!data) return undefined;
+  const cancelObserver = () => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+  };
 
-    let observer = null;
+  // 布局 + 懒渲染；runId 每次调用递增，旧队列自然作废
+  const layout = async (doc) => {
+    const runId = ++runIdRef.current;
+    const isCancelled = () => runId !== runIdRef.current;
+    const container = containerRef.current;
+    if (!container) return;
+
+    cancelObserver();
     let queue = Promise.resolve();
     let firstShown = false;
-    const openRun = ++runIdRef.current;
+    const zoomNow = zoomRef.current;
 
-    // 铺占位 + 挂懒渲染；runId 在每次布局开始时递增，旧队列自然作废
-    const layout = async (doc) => {
-      const runId = ++runIdRef.current;
-      const isCancelled = () => runId !== runIdRef.current;
-      const container = containerRef.current;
-      if (!container) return;
+    const cssWidth = container.clientWidth || document.documentElement.clientWidth;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
-      queue = Promise.resolve();
+    // 先取宽高比做占位（高度乘 zoom），避免布局跳动
+    const metas = [];
+    for (let num = 1; num <= doc.numPages; num++) {
+      const page = await doc.getPage(num);
+      const vp = page.getViewport({ scale: 1 });
+      page.cleanup();
+      metas.push({ num, ratio: vp.height / vp.width });
+      if (isCancelled()) return;
+    }
 
-      const cssWidth = container.clientWidth || document.documentElement.clientWidth;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    container.textContent = "";
+    const slots = metas.map((meta) => {
+      const div = document.createElement("div");
+      div.className = style["pdf-page-placeholder"];
+      div.style.height = Math.round(cssWidth * meta.ratio * zoomNow) + "px";
+      div.dataset.page = String(meta.num);
+      container.appendChild(div);
+      return div;
+    });
 
-      // 先只取宽高比做占位，避免布局跳动
-      const metas = [];
-      for (let num = 1; num <= doc.numPages; num++) {
-        const page = await doc.getPage(num);
-        const vp = page.getViewport({ scale: 1 });
+    const renderPage = async (slot) => {
+      if (isCancelled() || !slot.isConnected) return;
+      const num = Number(slot.dataset.page);
+      const page = await doc.getPage(num);
+      if (isCancelled()) {
         page.cleanup();
-        metas.push({ num, ratio: vp.height / vp.width });
-        if (isCancelled()) return;
+        return;
       }
-
-      container.textContent = "";
-      const slots = metas.map((meta) => {
-        const div = document.createElement("div");
-        div.className = style["pdf-page-placeholder"];
-        div.style.height = Math.round(cssWidth * meta.ratio) + "px";
-        div.dataset.page = String(meta.num);
-        container.appendChild(div);
-        return div;
-      });
-
-      const renderPage = async (slot) => {
-        if (isCancelled() || !slot.isConnected) return;
-        const num = Number(slot.dataset.page);
-        const page = await doc.getPage(num);
-        if (isCancelled()) {
-          page.cleanup();
-          return;
-        }
-        const base = page.getViewport({ scale: 1 });
-        const width = container.clientWidth || cssWidth;
-        const viewport = page.getViewport({ scale: (width / base.width) * dpr });
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
-        canvas.className = style["pdf-page"];
-        const ctx = canvas.getContext("2d", { alpha: false });
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        await page.render({ canvas, canvasContext: ctx, viewport }).promise;
-        page.cleanup();
-        if (isCancelled()) return;
-        slot.replaceWith(canvas);
-        if (!firstShown) {
-          firstShown = true;
-          setTip(""); // 第一页出来就撤加载提示，不等整本
-        }
-      };
-
-      // 串行队列：旧内核 worker 扛不住并行渲染
-      const enqueue = (slot) => {
-        queue = queue.then(renderPage.bind(null, slot), null);
-        queue = queue.catch((e) => {
-          if (!isCancelled()) {
-            setTip("");
-            setErrMsg(String((e && (e.message || e)) || "未知错误"));
-            setFailed(true);
-          }
-        });
-      };
-
-      enqueue(slots[0]); // 首页立即渲染
-
-      if (typeof IntersectionObserver === "function" && slots.length > 1) {
-        observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((en) => {
-              if (!en.isIntersecting) return;
-              observer.unobserve(en.target);
-              enqueue(en.target);
-            });
-          },
-          { rootMargin: "400px 0px" },
-        );
-        for (let i = 1; i < slots.length; i++) observer.observe(slots[i]);
-      } else {
-        for (let i = 1; i < slots.length; i++) enqueue(slots[i]); // 兜底：全量渲染
+      const base = page.getViewport({ scale: 1 });
+      const width = container.clientWidth || cssWidth;
+      // 清晰缩放：canvas 分辨率按 zoom 提高，而非拉伸位图
+      const viewport = page.getViewport({ scale: (width / base.width) * dpr * zoomNow });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.floor(viewport.width);
+      canvas.height = Math.floor(viewport.height);
+      canvas.className = style["pdf-page"];
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvas, canvasContext: ctx, viewport }).promise;
+      page.cleanup();
+      if (isCancelled()) return;
+      slot.replaceWith(canvas);
+      if (!firstShown) {
+        firstShown = true;
+        setTip("");
       }
     };
 
+    const enqueue = (slot) => {
+      queue = queue.then(renderPage.bind(null, slot), null);
+      queue = queue.catch((e) => {
+        if (!isCancelled()) {
+          setTip("");
+          setErrMsg(String((e && (e.message || e)) || "未知错误"));
+          setFailed(true);
+        }
+      });
+    };
+
+    enqueue(slots[0]); // 首页立即渲染
+
+    if (typeof IntersectionObserver === "function" && slots.length > 1) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((en) => {
+            if (!en.isIntersecting) return;
+            observer.unobserve(en.target);
+            enqueue(en.target);
+          });
+        },
+        { rootMargin: "400px 0px" },
+      );
+      observerRef.current = observer;
+      for (let i = 1; i < slots.length; i++) observer.observe(slots[i]);
+    } else {
+      for (let i = 1; i < slots.length; i++) enqueue(slots[i]);
+    }
+  };
+
+  // 打开文档 + 初始布局
+  useEffect(() => {
+    if (!data) return undefined;
+
+    setFailed(false);
+    setTip("PDF 加载中…");
+    const openRun = ++runIdRef.current;
+
     (async () => {
-      setFailed(false);
-      setTip("PDF 加载中…");
       try {
         const doc = await openDoc(data);
         if (openRun !== runIdRef.current) {
@@ -201,8 +199,7 @@ const PdfCanvasViewer = ({ data, onDownload }) => {
       }
     })();
 
-    // 仅“宽度真变”才重排：移动端滚动收起地址栏也会触发 resize，
-    // 旧代码每次都整本清空重渲染，是反复白屏闪烁的主要来源
+    // 仅“宽度真变”才重排
     let lastWidth = containerRef.current
       ? containerRef.current.clientWidth
       : document.documentElement.clientWidth;
@@ -212,11 +209,10 @@ const PdfCanvasViewer = ({ data, onDownload }) => {
       resizeTimer = setTimeout(() => {
         const width = (containerRef.current && containerRef.current.clientWidth) ||
           document.documentElement.clientWidth;
-        if (Math.abs(width - lastWidth) <= 1) return; // 高度变化（地址栏）不重排
+        if (Math.abs(width - lastWidth) <= 1) return;
         lastWidth = width;
-        const doc = docRef.current;
-        if (!doc) return;
-        layout(doc).catch(() => { /* layout 内部已有错误处理 */ });
+        if (!docRef.current) return;
+        layout(docRef.current).catch(() => { /* layout 内部已有错误处理 */ });
       }, 300);
     };
     window.addEventListener("resize", onResize);
@@ -225,10 +221,7 @@ const PdfCanvasViewer = ({ data, onDownload }) => {
       runIdRef.current += 1;
       window.removeEventListener("resize", onResize);
       clearTimeout(resizeTimer);
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
+      cancelObserver();
       if (docRef.current) {
         closeDoc(docRef.current);
         docRef.current = null;
@@ -236,9 +229,15 @@ const PdfCanvasViewer = ({ data, onDownload }) => {
     };
   }, [data]);
 
+  // zoom 变化 → 复用已打开的文档，直接重排重渲染（清晰放大）
+  useEffect(() => {
+    if (!zoom || !docRef.current) return;
+    layout(docRef.current).catch(() => { /* layout 内部已有错误处理 */ });
+  }, [zoom]);
+
   return (
     <div className={style["pdf-canvas-scope"]}>
-      
+
       {tip && !failed && <Loading message={tip} />}
       {failed && (
         <div className={style["pdf-error"]}>
