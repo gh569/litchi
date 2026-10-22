@@ -180,14 +180,18 @@ const DocumentPreviewPage = () => {
           )}
 
           {(fileType === "docx" || (fileType === "doc" && htmlContent)) && htmlContent && (
-            <div style={{ zoom }}>
-              <div className={style['doc-wrapper']} dangerouslySetInnerHTML={{ __html: htmlContent }} />
+            <div style={{ height: 'calc(100vh - 48px)', overflowY: 'auto', overflowX: 'auto' }}>
+              <div style={{ zoom }}>
+                <div className={style['doc-wrapper']} dangerouslySetInnerHTML={{ __html: htmlContent }} />
+              </div>
             </div>
           )}
 
           {EXCEL_TYPES.includes(fileType) && excelBuffer && (
-            <div style={{ zoom }}>
-              <ExcelPreview arrayBuffer={excelBuffer} />
+            <div style={{ height: 'calc(100vh - 48px)', overflowY: 'auto', overflowX: 'auto' }}>
+              <div style={{ zoom }}>
+                <ExcelPreview arrayBuffer={excelBuffer} />
+              </div>
             </div>
           )}
 
