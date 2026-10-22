@@ -113,7 +113,7 @@ const DocumentPreviewPage = () => {
       setDocUnsupported(false);
 
       try {
-        const response = await fetch('/api/file?url=' + encodeURIComponent(url));
+        const response = await fetch('/api/contractor/file?url=' + encodeURIComponent(url));
         if (!response.ok) {
           setError(`文件下载失败，HTTP ${response.status}`);
           return;

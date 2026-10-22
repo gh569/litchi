@@ -1,5 +1,5 @@
 // 登录接口：校验账号密码，签发 token
-import { sign } from '../auth-utils.js'
+import { sign } from '../../_lib/auth-utils.js'
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {

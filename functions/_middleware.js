@@ -1,12 +1,14 @@
 // 全局中间件：保护 /api/*（白名单放行，其他需登录 token）
-import { verify, getToken } from './auth-utils.js'
+import { verify, getToken } from './_lib/auth-utils.js'
 
 // API 白名单（无需登录即可访问）
-//  - login: 登录接口本身
-//  - whitelist: 前端守卫需要读取白名单（未登录也要读）
-//  - check: 前端守卫校验登录态（未登录也要能问出 401）
-//  - file: 文件预览页(doc-viewer)是免登录白名单页，需代理拉取文件
-const API_WHITELIST = ['/api/login', '/api/whitelist', '/api/check', '/api/file']
+//  - auth/login: 登录接口本身
+//  - auth/whitelist: 前端守卫需要读取白名单（未登录也要读）
+//  - auth/check: 前端守卫校验登录态（未登录也要能问出 401）
+//  - contractor/file: 文件预览页(doc-viewer)是免登录白名单页，需代理拉取文件
+const API_WHITELIST = [
+  '/api/auth/login', '/api/auth/whitelist', '/api/auth/check', '/api/contractor/file',
+]
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {

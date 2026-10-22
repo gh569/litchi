@@ -19,7 +19,7 @@ export default function Sync() {
     setError(null)
     setResult(null)
     try {
-      const url = '/api/wps-sync' + (sheet ? '?sheet=' + encodeURIComponent(sheet) : '')
+      const url = '/api/sync' + (sheet ? '?sheet=' + encodeURIComponent(sheet) : '')
       const res = await fetch(url)
       const data = await res.json()
       if (data.error || !res.ok) {

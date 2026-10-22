@@ -8,7 +8,7 @@ export default function ({ files }) {
 
 	const download = async attachment => {
 		try {
-			const res = await fetch('/api/attachments', {
+			const res = await fetch('/api/contractor/attachments', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ attachs: [attachment] }),

@@ -1,5 +1,5 @@
 // 校验登录态：前端路由守卫启动时调用
-import { verify, getToken } from '../auth-utils.js'
+import { verify, getToken } from '../../_lib/auth-utils.js'
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {

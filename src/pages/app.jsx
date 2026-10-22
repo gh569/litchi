@@ -20,7 +20,7 @@ const routes = Object.entries(pages).map(([file, Comp]) => {
 })
 
 // 登录守卫：未登录且不在白名单内的页面，跳转到 /login
-// 白名单从 /api/whitelist 读取（默认 /login + /contractor/doc-viewer，可在 KV "whitelist" 配置）
+// 白名单从 /api/auth/whitelist 读取（默认 /login + /contractor/doc-viewer，可在 KV "whitelist" 配置）
 function AuthGuard({ children }) {
   const [location] = useLocation()
   const [state, setState] = useState(null) // { checked, loggedIn, whitelist }
@@ -30,7 +30,7 @@ function AuthGuard({ children }) {
     ;(async () => {
       let whitelist = ['/login']
       try {
-        const r = await fetch('/api/whitelist')
+        const r = await fetch('/api/auth/whitelist')
         if (r.ok) {
           const d = await r.json()
           if (Array.isArray(d.whitelist) && d.whitelist.length) whitelist = d.whitelist
@@ -41,7 +41,7 @@ function AuthGuard({ children }) {
       let loggedIn = false
       if (token) {
         try {
-          const res = await fetch('/api/check', {
+          const res = await fetch('/api/auth/check', {
             headers: { Authorization: `Bearer ${token}` },
           })
           loggedIn = res.ok
