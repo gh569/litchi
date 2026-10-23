@@ -9,24 +9,26 @@ export default function ChangePassword() {
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [ready, setReady] = useState(false)
+  const [recovery, setRecovery] = useState(null) // null: 加载中 / false: 无recovery令牌 / true: 有
 
-  // 消费找回密码令牌（来自邮件链接，main.jsx 抢收存 sessionStorage）
+  // 仅当来自"忘记密码邮件"的 recovery 令牌时才允许改密
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       let payload = null
       try { payload = JSON.parse(sessionStorage.getItem('supabase_recovery') || 'null') } catch (e) { payload = null }
+      let hasRecovery = false
       if (payload && payload.access_token) {
         try {
           await supabase.auth.setSession({
             access_token: payload.access_token,
             refresh_token: payload.refresh_token || '',
           })
+          hasRecovery = true
         } catch (e) { console.error('[change-password] setSession failed', e) }
         try { sessionStorage.removeItem('supabase_recovery') } catch (e) {}
       }
-      if (!cancelled) setReady(true)
+      if (!cancelled) setRecovery(hasRecovery)
     })()
     return () => { cancelled = true }
   }, [])
@@ -52,7 +54,7 @@ export default function ChangePassword() {
     }
   }
 
-  if (!ready) return null
+  if (recovery === null) return null
 
   return (
     <div>
@@ -64,6 +66,13 @@ export default function ChangePassword() {
             <h3 className={style['status-title']}>密码修改成功</h3>
             <p className={style['status-text']}>您的密码已成功更新，请返回首页并重新登录。</p>
             <a className={style['goto-home']} href="/">返回首页</a>
+          </div>
+        ) : !recovery ? (
+          <div className={style['status-card']}>
+            <div className={`${style['status-icon']} ${style['status-icon-info']}`}>!</div>
+            <h3 className={style['status-title']}>请从邮箱链接进入</h3>
+            <p className={style['status-text']}>请打开您收到的密码重置邮件，点击其中的链接进行修改。</p>
+            <a className={style['goto-home']} href="/forgot-password">去发送重置邮件</a>
           </div>
         ) : (
           <form className={style.card} onSubmit={submit}>

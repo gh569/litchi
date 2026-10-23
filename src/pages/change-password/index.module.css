@@ -57,6 +57,10 @@
   margin: 0 auto 12px;
 }
 
+.status-icon-info {
+  background: #1f6feb;
+}
+
 .status-title { margin: 0 0 8px; }
 .status-text { color: #666; font-size: 14px; }
 

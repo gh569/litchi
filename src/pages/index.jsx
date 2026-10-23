@@ -1,4 +1,55 @@
 import { Link } from 'wouter-preact'
+import { useEffect, useState } from 'preact/hooks'
+import { supabase } from '../lib/supabase'
+
+// 账号入口：根据登录态显示「登录」或「账号邮箱 + 登出」
+function AccountEntry() {
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    let sub = null
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data?.session?.user || null)
+    }).catch(() => {})
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null)
+    })
+    return () => { sub?.unsubscribe?.() }
+  }, [])
+
+  const logout = async () => {
+    try { await supabase.auth.signOut() } catch (e) { /* 忽略 */ }
+    window.location.href = '/'
+  }
+
+  const base = {
+    display: 'block',
+    padding: '16px 20px',
+    background: '#eefaf3',
+    borderRadius: 10,
+    color: '#1a7f37',
+    textDecoration: 'none',
+    fontSize: 16,
+    fontWeight: 600,
+    border: '1px solid #c6f6d5',
+  }
+  const span = { display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }
+
+  if (user) {
+    return (
+      <div style={{ ...base, color: '#1a7f37' }}>
+        {user.email}
+        <span style={span}>已登录 · <a href="#" style={{ color: '#1a7f37' }} onClick={(e) => { e.preventDefault(); logout() }}>退出登录</a></span>
+      </div>
+    )
+  }
+  return (
+    <Link href="/login" style={base}>
+      登录
+      <span style={span}>登录后使用完整功能</span>
+    </Link>
+  )
+}
 
 // 主页 / 导航页
 export default function Home() {
@@ -101,25 +152,7 @@ export default function Home() {
             从 WPS 更新案例/客户/施工方/报价数据
           </span>
         </Link>
-        <Link
-          href="/change-password"
-          style={{
-            display: 'block',
-            padding: '16px 20px',
-            background: '#f6f4ff',
-            borderRadius: 10,
-            color: '#6d4cbd',
-            textDecoration: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            border: '1px solid #e0d7f5',
-          }}
-        >
-          修改密码
-          <span style={{ display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }}>
-            更新登录密码
-          </span>
-        </Link>
+        <AccountEntry />
       </nav>
     </div>
   )
