@@ -10,6 +10,4 @@ unpackage/
 
 .dev.vars
 
-# 本地环境变量(含公开anon key与部署变量)，不上传，用 .env.example 作模板
-.env
 
