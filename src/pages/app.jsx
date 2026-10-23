@@ -51,6 +51,15 @@ function AuthGuard({ children }) {
 
   if (!state || !state.checked) return null
 
+  // 找回密码恢复中：邮件链接带 recovery 令牌（已抢收存 sessionStorage），放行让改密页消费
+  const isRecovery = (() => {
+    try {
+      if (window.location.hash.includes("type=recovery")) return true
+      return !!sessionStorage.getItem("supabase_recovery")
+    } catch (e) { return false }
+  })()
+  if (isRecovery) return children
+
   // 取纯路径（去掉 query/hash）
   const path = (() => {
     try { return new URL(location, window.location.origin).pathname }

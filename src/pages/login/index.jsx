@@ -60,6 +60,9 @@ export default function Login() {
         <button className={style.button} type="submit" disabled={loading}>
           {loading ? '登录中…' : '登录'}
         </button>
+        <div className={style.footer}>
+          <a className={style.forgot} href="/forgot-password">忘记密码？</a>
+        </div>
       </form>
     </div>
   )

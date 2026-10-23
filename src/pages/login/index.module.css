@@ -69,3 +69,11 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.footer { margin-top: 14px; text-align: center; }
+
+.forgot {
+  color: #1f6feb;
+  text-decoration: none;
+  font-size: 13px;
+}
