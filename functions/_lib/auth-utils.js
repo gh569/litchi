@@ -73,6 +73,9 @@ export async function verifySupabaseToken(token, env) {
   if (!token) return null
   const url = (env?.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/+$/, '')
   const anonKey = env?.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
+  // 加超时，防止 Supabase 网络慢导致 API 请求挂起
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 4000)
   try {
     const res = await fetch(`${url}/auth/v1/user`, {
       method: 'GET',
@@ -80,10 +83,13 @@ export async function verifySupabaseToken(token, env) {
         Authorization: `Bearer ${token}`,
         apikey: anonKey,
       },
+      signal: controller.signal,
     })
     if (!res.ok) return null
     return await res.json()
   } catch (e) {
     return null
+  } finally {
+    clearTimeout(timer)
   }
 }
