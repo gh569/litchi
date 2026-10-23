@@ -67,13 +67,49 @@ export function getToken(request, url) {
 const DEFAULT_SUPABASE_URL = 'https://glfaxzznirhqtyidkrew.supabase.co'
 const DEFAULT_SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsZmF4enpuaXJocXR5aWRrcmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQyNDQyNDgsImV4cCI6MjA0OTgyMDI0OH0.bUA-06FrERbBrtvOf7P_wahh3x-3wjkdP5Lpe061KT0'
+// Supabase 项目 JWT secret（HS256 签名密钥，用于本地验签 access_token，零网络往返）
+const DEFAULT_SUPABASE_JWT_SECRET =
+  'OVl5p0VRF6fLoEpCQSZ09JbfooOIiVXfd2yOQ+nROJ+7b2wha5MNqp9WL69CVCnjtuGcSO4F5d6b3/XxW9ZMDw=='
 
-// 校验 Supabase access token：调 Supabase /auth/v1/user 确认有效，返回 user 或 null
+// base64url -> 字节
+function b64urlToBytes(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/')
+  while (str.length % 4) str += '='
+  const bin = atob(str)
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0))
+}
+
+// 本地验签 Supabase JWT（HS256，secret 为 UTF-8 原始字符串），有效返回 payload，否则 null
+async function verifyLocal(token, secret) {
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  const [h, p, s] = parts
+  let header, payload
+  try {
+    header = JSON.parse(b64urlDecode(h))
+    payload = JSON.parse(b64urlDecode(p))
+  } catch (e) { return null }
+  if (header.alg !== 'HS256') return null
+  const signingInput = h + '.' + p
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']
+  )
+  const valid = await crypto.subtle.verify('HMAC', key, b64urlToBytes(s), new TextEncoder().encode(signingInput))
+  if (!valid) return null
+  if (!payload.exp || payload.exp * 1000 < Date.now()) return null
+  return payload
+}
+
+// 校验 Supabase access token：优先本地 HS256 验签，无 secret 时回退调 Supabase /auth/v1/user
 export async function verifySupabaseToken(token, env) {
   if (!token) return null
+  const secret = env?.SUPABASE_JWT_SECRET || DEFAULT_SUPABASE_JWT_SECRET
+  if (secret) {
+    return verifyLocal(token, secret)
+  }
+  // 回退：调 Supabase Auth 验证
   const url = (env?.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/+$/, '')
   const anonKey = env?.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
-  // 加超时，防止 Supabase 网络慢导致 API 请求挂起
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), 4000)
   try {
