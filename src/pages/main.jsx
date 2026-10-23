@@ -18,6 +18,10 @@ import { supabase } from "../lib/supabase";
       )
       // 清掉 URL 中的 token hash，避免重复抢收
       window.history.replaceState(null, "", window.location.pathname + window.location.search)
+      // 自动跳转到改密页（邮件链接回到首页时，直接进入 /change-password）
+      if (window.location.pathname !== "/change-password") {
+        window.location.replace("/change-password")
+      }
     }
   } catch (e) {}
 })()
