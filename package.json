@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@preact/signals": "^2.0.4",
+		"@supabase/supabase-js": "^2.118.0",
 		"antd-mobile": "^5.43.0",
 		"echarts": "^6.1.0",
 		"mammoth": "^1.13.0",

@@ -1,13 +1,11 @@
-// 全局中间件：保护 /api/*（白名单放行，其他需登录 token）
-import { verify, getToken } from './_lib/auth-utils.js'
+// 全局中间件：保护 /api/*（白名单放行，其他需 Supabase 登录 token）
+import { verifySupabaseToken, getToken } from './_lib/auth-utils.js'
 
 // API 白名单（无需登录即可访问）
-//  - auth/login: 登录接口本身
-//  - auth/whitelist: 前端守卫需要读取白名单（未登录也要读）
-//  - auth/check: 前端守卫校验登录态（未登录也要能问出 401）
+//  - auth/whitelist: 前端守卫需要读取页面白名单（未登录也要读）
 //  - contractor/file: 文件预览页(doc-viewer)是免登录白名单页，需代理拉取文件
 const API_WHITELIST = [
-  '/api/auth/login', '/api/auth/whitelist', '/api/auth/check', '/api/contractor/file',
+  '/api/auth/whitelist', '/api/contractor/file',
 ]
 
 function json(data, status = 200) {
@@ -30,13 +28,13 @@ export async function onRequest(context) {
     return next()
   }
 
-  // 其余 API 校验 token
+  // 其余 API 校验 Supabase token
   const token = getToken(request, url)
   if (!token) {
     return json({ error: '未登录' }, 401)
   }
-  const payload = await verify(token, env)
-  if (!payload) {
+  const user = await verifySupabaseToken(token, env)
+  if (!user) {
     return json({ error: '登录已过期，请重新登录' }, 401)
   }
   return next()

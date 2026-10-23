@@ -1,5 +1,6 @@
 import { Router, Route, Switch, useLocation, Redirect } from 'wouter-preact'
 import { useEffect, useState } from 'preact/hooks'
+import { supabase } from '../lib/supabase'
 
 // history 文件路由（类似 Next.js pages 约定）：
 // src/pages/**/index.jsx 每个文件 = 一个路由，文件夹路径即 URL。
@@ -20,6 +21,7 @@ const routes = Object.entries(pages).map(([file, Comp]) => {
 })
 
 // 登录守卫：未登录且不在白名单内的页面，跳转到 /login
+// 登录态由 Supabase 会话判断（supabase-js 持久化到 localStorage）
 // 白名单从 /api/auth/whitelist 读取（默认 /login + /contractor/doc-viewer，可在 KV "whitelist" 配置）
 function AuthGuard({ children }) {
   const [location] = useLocation()
@@ -37,17 +39,11 @@ function AuthGuard({ children }) {
         }
       } catch (e) { /* 忽略 */ }
 
-      const token = localStorage.getItem('litchi_token')
       let loggedIn = false
-      if (token) {
-        try {
-          const res = await fetch('/api/auth/check', {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          loggedIn = res.ok
-          if (!res.ok) localStorage.removeItem('litchi_token')
-        } catch (e) { loggedIn = false }
-      }
+      try {
+        const { data } = await supabase.auth.getSession()
+        loggedIn = !!data.session
+      } catch (e) { loggedIn = false }
       if (!cancelled) setState({ checked: true, loggedIn, whitelist })
     })()
     return () => { cancelled = true }

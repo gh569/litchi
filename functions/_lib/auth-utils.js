@@ -61,3 +61,29 @@ export function getToken(request, url) {
   if (url) return url.searchParams.get('token') || ''
   return ''
 }
+
+// ---- Supabase Auth 验证 ----
+// 默认值来自 uni-preact 已配置的项目（URL + public anon key），可用环境变量覆盖
+const DEFAULT_SUPABASE_URL = 'https://glfaxzznirhqtyidkrew.supabase.co'
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsZmF4enpuaXJocXR5aWRrcmV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQyNDQyNDgsImV4cCI6MjA0OTgyMDI0OH0.bUA-06FrERbBrtvOf7P_wahh3x-3wjkdP5Lpe061KT0'
+
+// 校验 Supabase access token：调 Supabase /auth/v1/user 确认有效，返回 user 或 null
+export async function verifySupabaseToken(token, env) {
+  if (!token) return null
+  const url = (env?.SUPABASE_URL || DEFAULT_SUPABASE_URL).replace(/\/+$/, '')
+  const anonKey = env?.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY
+  try {
+    const res = await fetch(`${url}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: anonKey,
+      },
+    })
+    if (!res.ok) return null
+    return await res.json()
+  } catch (e) {
+    return null
+  }
+}
