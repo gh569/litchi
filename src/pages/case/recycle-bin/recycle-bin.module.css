@@ -1,0 +1,21 @@
+.content-container {
+  padding: 16px 20px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.loading-container { padding: 40px 0; }
+
+.info-section { margin-bottom: 12px; }
+.info-section-text { color: #666; font-size: 14px; margin: 0; }
+
+.cases-list { display: flex; flex-direction: column; gap: 8px; }
+
+.empty-container {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.empty-title { margin: 10px 0 6px; }
+.empty-text { font-size: 14px; }

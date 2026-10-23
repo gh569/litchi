@@ -28,8 +28,8 @@ const fieldMap = {
   "关联：报价合同": "contractSheet",
 };
 
-// 默认同步的三张表
-const SHEETS = ["施工方", "客户", "报价"];
+// 默认同步的表（含案例，与 uni-preact 050-from-wps 四模块对齐）
+const SHEETS = ["施工方", "客户", "报价", "案例"];
 
 // 时间字段转时间戳，空值/解析失败兜底，不产出 NaN
 const toTimeNum = (val) => {

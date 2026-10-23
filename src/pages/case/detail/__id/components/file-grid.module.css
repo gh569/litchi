@@ -1,0 +1,53 @@
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(50% - 5px);
+  padding: 10px;
+  border: 1px solid #eef0f2;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fafbfc;
+  box-sizing: border-box;
+}
+
+.item:hover { background: #f0f4ff; }
+
+.icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: #3498db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileExt {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.info { min-width: 0; }
+
+.name {
+  font-size: 13px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.size {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
