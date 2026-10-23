@@ -1,0 +1,9 @@
+.page {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.searchRow {
+  margin: 10px 0;
+}

@@ -77,13 +77,6 @@ const DocumentPreviewPage = () => {
   const [docUnsupported, setDocUnsupported] = useState(false);
   const [zoom, setZoom] = useState(1);
 
-  // 缩放工具条按钮样式
-  const zoomBtnStyle = {
-    minWidth: 34, height: 32, padding: "0 10px", fontSize: 16,
-    border: "1px solid #e5e5e5", borderRadius: 6, background: "#fff",
-    color: "#333", cursor: "pointer", lineHeight: "30px",
-  };
-
   // 触发浏览器下载的函数
   const triggerDownload = (fileUrl, name) => {
     const a = document.createElement("a");
@@ -167,11 +160,11 @@ const DocumentPreviewPage = () => {
       ) : (
         <>
           {(PREVIEWABLE.includes(fileType)) && (
-            <div style={{ position: 'sticky', top: 0, zIndex: 20, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#fafafa', borderBottom: '1px solid #eee', justifyContent: 'center' }}>
-              <button onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))} style={zoomBtnStyle}>−</button>
-              <span style={{ minWidth: 46, textAlign: 'center', fontSize: 13, color: '#333' }}>{Math.round(zoom * 100)}%</span>
-              <button onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))} style={zoomBtnStyle}>＋</button>
-              <button onClick={() => setZoom(1)} style={{ ...zoomBtnStyle, fontSize: 12 }}>重置</button>
+            <div className={style['zoom-toolbar']}>
+              <button onClick={() => setZoom((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))} className={style['zoom-btn']}>−</button>
+              <span className={style['zoom-percent']}>{Math.round(zoom * 100)}%</span>
+              <button onClick={() => setZoom((z) => Math.min(3, +(z + 0.25).toFixed(2)))} className={style['zoom-btn']}>＋</button>
+              <button onClick={() => setZoom(1)} className={`${style['zoom-btn']} ${style['zoom-btn-reset']}`}>重置</button>
             </div>
           )}
 
@@ -180,16 +173,16 @@ const DocumentPreviewPage = () => {
           )}
 
           {(fileType === "docx" || (fileType === "doc" && htmlContent)) && htmlContent && (
-            <div style={{ height: 'calc(100vh - 48px)', overflowY: 'auto', overflowX: 'auto' }}>
-              <div style={{ zoom }}>
+            <div className={style['scroll-box']}>
+              <div className={style['zoom-scale']} style={{ '--zoom': zoom }}>
                 <div className={style['doc-wrapper']} dangerouslySetInnerHTML={{ __html: htmlContent }} />
               </div>
             </div>
           )}
 
           {EXCEL_TYPES.includes(fileType) && excelBuffer && (
-            <div style={{ height: 'calc(100vh - 48px)', overflowY: 'auto', overflowX: 'auto' }}>
-              <div style={{ zoom }}>
+            <div className={style['scroll-box']}>
+              <div className={style['zoom-scale']} style={{ '--zoom': zoom }}>
                 <ExcelPreview arrayBuffer={excelBuffer} />
               </div>
             </div>

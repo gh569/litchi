@@ -139,7 +139,7 @@ export default function CaseList() {
           </div>
         )}
 
-        <div ref={sentinelRef} style={{ height: 1 }}></div>
+        <div ref={sentinelRef} className={style.sentinel}></div>
         {loadingMore && <div className={style['load-more-container']}><span>加载更多...</span></div>}
       </div>
 

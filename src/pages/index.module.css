@@ -1,0 +1,75 @@
+.page {
+  padding: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.title { font-size: 22px; }
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.card {
+  display: block;
+  padding: 16px 20px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.card-stock {
+  background: #f0f4ff;
+  color: #1f6feb;
+  border: 1px solid #d6e4ff;
+}
+
+.card-data {
+  background: #f0fff4;
+  color: #1a7f37;
+  border: 1px solid #c6f6d5;
+}
+
+.card-contractor {
+  background: #fff8f0;
+  color: #b56a1a;
+  border: 1px solid #ffe0b0;
+}
+
+.card-case {
+  background: #fdf0ff;
+  color: #8b5cf6;
+  border: 1px solid #e9d5ff;
+}
+
+.card-sync {
+  background: #f0f4ff;
+  color: #1f6feb;
+  border: 1px solid #d6e4ff;
+}
+
+.card-desc {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.account-card {
+  display: block;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: #eefaf3;
+  color: #1a7f37;
+  border: 1px solid #c6f6d5;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.logout-link { color: #1a7f37; }

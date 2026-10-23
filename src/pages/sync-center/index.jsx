@@ -25,16 +25,16 @@ export default function SyncCenter() {
               to={item.href}
               target="_self"
               className={style['nav-card']}
-              style={{ animationDelay: `${index * 60}ms` }}
+              style={{ '--delay': `${index * 60}ms` }}
             >
-              <div className={style['card-icon-box']} style={{ background: item.bg }}>
+              <div className={style['card-icon-box']} style={{ '--bg': item.bg }}>
                 <span className={style['card-icon']}>{item.icon}</span>
               </div>
               <div className={style['card-content']}>
-                <h2 className={style['card-title']} style={{ color: item.color }}>{item.title}</h2>
+                <h2 className={style['card-title']} style={{ '--color': item.color }}>{item.title}</h2>
                 <p className={style['card-desc']}>{item.desc}</p>
               </div>
-              <div className={style['card-arrow']} style={{ color: item.color }}>
+              <div className={style['card-arrow']} style={{ '--color': item.color }}>
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
               </div>
             </Link>

@@ -1,6 +1,7 @@
 import { Link } from 'wouter-preact'
 import { useEffect, useState } from 'preact/hooks'
 import { supabase } from '../lib/supabase'
+import style from './index.module.css'
 
 // 账号入口：根据登录态显示「登录」或「账号邮箱 + 登出」
 function AccountEntry() {
@@ -22,31 +23,18 @@ function AccountEntry() {
     window.location.href = '/'
   }
 
-  const base = {
-    display: 'block',
-    padding: '16px 20px',
-    background: '#eefaf3',
-    borderRadius: 10,
-    color: '#1a7f37',
-    textDecoration: 'none',
-    fontSize: 16,
-    fontWeight: 600,
-    border: '1px solid #c6f6d5',
-  }
-  const span = { display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }
-
   if (user) {
     return (
-      <div style={{ ...base, color: '#1a7f37' }}>
+      <div className={style['account-card']}>
         {user.email}
-        <span style={span}>已登录 · <a href="#" style={{ color: '#1a7f37' }} onClick={(e) => { e.preventDefault(); logout() }}>退出登录</a></span>
+        <span className={style['card-desc']}>已登录 · <a className={style['logout-link']} href="#" onClick={(e) => { e.preventDefault(); logout() }}>退出登录</a></span>
       </div>
     )
   }
   return (
-    <Link href="/login" style={base}>
+    <Link href="/login" className={style['account-card']}>
       登录
-      <span style={span}>登录后使用完整功能</span>
+      <span className={style['card-desc']}>登录后使用完整功能</span>
     </Link>
   )
 }
@@ -54,104 +42,30 @@ function AccountEntry() {
 // 主页 / 导航页
 export default function Home() {
   return (
-    <div style={{ padding: 24, maxWidth: 480, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 22 }}>股票工具</h1>
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 24 }}>
-        <Link
-          href="/stock"
-          style={{
-            display: 'block',
-            padding: '16px 20px',
-            background: '#f0f4ff',
-            borderRadius: 10,
-            color: '#1f6feb',
-            textDecoration: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            border: '1px solid #d6e4ff',
-          }}
-        >
-          股票行情与 K 线
-          <span style={{ display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }}>
-            个股行情、K线、均线
-          </span>
-        </Link>
-        <Link
-          href="/data"
-          style={{
-            display: 'block',
-            padding: '16px 20px',
-            background: '#f0fff4',
-            borderRadius: 10,
-            color: '#1a7f37',
-            textDecoration: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            border: '1px solid #c6f6d5',
-          }}
-        >
-          大数据流式加载
-          <span style={{ display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }}>
-            5000 条数据边接收边渲染
-          </span>
-        </Link>
-        <Link
-          href="/contractor"
-          style={{
-            display: 'block',
-            padding: '16px 20px',
-            background: '#fff8f0',
-            borderRadius: 10,
-            color: '#b56a1a',
-            textDecoration: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            border: '1px solid #ffe0b0',
-          }}
-        >
+    <div className={style.page}>
+      <h1 className={style.title}>股票工具</h1>
+      <nav className={style.nav}>
+       
+        <Link href="/contractor" className={`${style.card} ${style['card-contractor']}`}>
           查找施工方
-          <span style={{ display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }}>
-            搜索施工方、详情、报价与客户
-          </span>
+          <span className={style['card-desc']}>搜索施工方、详情、报价与客户</span>
         </Link>
-        <Link
-          href="/case"
-          style={{
-            display: 'block',
-            padding: '16px 20px',
-            background: '#fdf0ff',
-            borderRadius: 10,
-            color: '#8b5cf6',
-            textDecoration: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            border: '1px solid #e9d5ff',
-          }}
-        >
+        <Link href="/case" className={`${style.card} ${style['card-case']}`}>
           案例模块
-          <span style={{ display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }}>
-            案例列表、搜索、我的资料、回收站
-          </span>
+          <span className={style['card-desc']}>案例列表、搜索、我的资料、回收站</span>
         </Link>
-        <Link
-          href="/sync-center"
-          style={{
-            display: 'block',
-            padding: '16px 20px',
-            background: '#f0f4ff',
-            borderRadius: 10,
-            color: '#1f6feb',
-            textDecoration: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            border: '1px solid #d6e4ff',
-          }}
-        >
+        <Link href="/sync-center" className={`${style.card} ${style['card-sync']}`}>
           数据同步中心
-          <span style={{ display: 'block', fontSize: 12, color: '#888', fontWeight: 400, marginTop: 4 }}>
-            从 WPS 更新案例/客户/施工方/报价数据
-          </span>
+          <span className={style['card-desc']}>从 WPS 更新案例/客户/施工方/报价数据</span>
         </Link>
+				<Link href="/stock" className={`${style.card} ${style['card-stock']}`}>
+				  股票行情与 K 线
+				  <span className={style['card-desc']}>个股行情、K线、均线</span>
+				</Link>
+				<Link href="/data" className={`${style.card} ${style['card-data']}`}>
+				  大数据流式加载
+				  <span className={style['card-desc']}>5000 条数据边接收边渲染</span>
+				</Link>
         <AccountEntry />
       </nav>
     </div>

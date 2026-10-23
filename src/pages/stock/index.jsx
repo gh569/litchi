@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks'
 import StockQuote from '../../components/stock-quote'
 import StockKline from '../../components/stock-kline'
+import style from './index.module.css'
 
 const STOCKS = [
   { code: '600519.SH', name: '贵州茅台' },
@@ -21,7 +22,7 @@ export default function StockPage() {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 900, margin: '0 auto' }}>
+    <div className={style.page}>
       <div>
         {STOCKS.map((s) => (
           <button key={s.code} onClick={() => select(s.code)}>
@@ -30,7 +31,7 @@ export default function StockPage() {
         ))}
       </div>
 
-      <div style={{ margin: '10px 0' }}>
+      <div className={style.searchRow}>
         <input
           value={input}
           onInput={(e) => setInput(e.target.value)}
