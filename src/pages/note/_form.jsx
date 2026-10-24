@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'preact/hooks'
-import { useParams, Link } from 'wouter-preact'
+import { useParams, Link, useLocation } from 'wouter-preact'
 import style from './_form.module.css'
 
 const LANGS = ['javascript','js-norun', 'html','shell' /*, 'css', 'python', 'sql',  'json', 'text'*/]
 
 export default function NoteForm({ mode }) {
   const { id } = useParams()
+  const [, navigate] = useLocation()
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [content, setContent] = useState('')
@@ -55,7 +56,10 @@ export default function NoteForm({ mode }) {
       })
       const d = await r.json()
       if (!r.ok) { setError(d.error || '保存失败'); setSaving(false); return }
-      window.location.href = `/note/detail/${encodeURIComponent(d.id)}`
+      // 编辑：history.back 回退到进入编辑前的详情页（路由切回会重新拉取最新数据），返回一次即到列表
+      // 新增：替换当前页为新笔记详情页，返回直接回列表
+      if (mode === 'edit') navigate(-1)
+      else navigate(`/note/detail/${encodeURIComponent(d.id)}`, { replace: true })
     } catch (e) {
       setError('网络错误，请稍后重试')
       setSaving(false)
