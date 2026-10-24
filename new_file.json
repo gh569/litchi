@@ -1,0 +1,723 @@
+[{
+	"id": "675a649c7871b524436202e4",
+	"title": "fetch的使用",
+	"category": "#js",
+	"content": "可以导入vite中public目录下的文件",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\nfetch('/test/test.json').then(response=>{\n\treturn response.json()\n}).then(json=>{\n\tconsole.log(json)\n})\n\t\t",
+		"title": "导入json文件\ntest.json为vite项目中bublic目录下的文件"
+	}, {
+		"lang": "javascript",
+		"code": "\nfetch('/test/test.html').then(response=>{\n\treturn response.text()\n}).then(json=>{\n\tconsole.log(json)\n})\n\t\t",
+		"title": "导入html文件\n"
+	}],
+	"createTime": 1733977245018,
+	"updateTime": 1792832183598,
+	"isDeleted": false
+}, {
+	"id": "675a66467871b524436225fa",
+	"title": "preact中使用react组件",
+	"category": "#react,#preact",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "",
+		"title": "安装相应包\npreact v10已经包含了preact/compat.\n  preact v8需要安装 npm i preact-compat.\n  安装相应react组件"
+	}, {
+		"lang": "javascript",
+		"code": "import { resolve } from \"path\";\n\t \nexport default {\n\tesbuild: {\n\t\tjsxFactory: \"h\",\n\t\tjsxFragment: \"h.f\"\n\t},\n\t resolve: {\n\t\t\talias: {\n\t\t\t\t'react': 'preact/compat', \n\t\t\t\t'react-dom':'preact/compat', \n\t\t\t\t// 你可以根据需要设置更多别名\n\t\t\t},\n\t\t},\n};\n\t\n\t",
+		"title": "设置vite.config.js\n以下是preact v10示例，v8需要把'preact/compat'换成'preact-compat'"
+	}],
+	"createTime": 1733977671408,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "675a9e2efdd21a3684bc8d07",
+	"title": "vite动态加载外部js免打包实现",
+	"category": "#nodejs",
+	"content": "static目录不打包指的发行时候，不对static目录内的文件编译压缩。但是如页面import了某个js文件，该文件是会被编译打包的。例如用import.meta.glob动态引用后，发布时会被编译，例如H5发布后，在unpackagedistuildh5assets里",
+	"codes": [{
+		"lang": "javascript",
+		"code": "//dynamicForm的某method方法里\n\nvar that=this; \n//单个文件导入写法\nconst formjsurl = '/static/form/js/' + this.bizinfo[0].formGuid + '.js';\nthis.formjs = import(`/static/form/js/${formguid}.js`);\nconsole.log(this.formjs);\n\n//多个文件导入写法\nconst modules =import.meta.glob('/static/form/js/*.js'); \nconsole.log(modules);\t\t\t\t\t\t\t\n//获取当前表单js模型\nmodules[formjsurl]().then(({\n\tdefault: theDefault\n        }) => {\n\t  that.formjs = theDefault;\n\t  console.log(that.formjs);\n\t}).catch(err => {\n\t  console.log(err);\n\t});\n\t\t",
+		"title": "import.meta.glob动态引用\n"
+	}],
+	"createTime": 1733991982240,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "675a9f2883028b219b636f6a",
+	"title": "高阶函数的应用",
+	"category": "#js",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\t\t\n// datas 执行的任务数组\n// taskHandler 执行任务函数\nfunction performChunk(datas,taskHandler){\n\tif(datas.length===0){\n\t\treturn;\n\t}\n\tlet i=0;\n\t_run();\n\t\n\tfunction _run(){\n\t\tif(i>=datas.length){\n\t\t\treturn\n\t\t}\n\t\trequestIdleCallback((idle)=>{\n\t\t\twhile(idle.timeRemaining()>0 && i<datas.length){\n\t\t\t\ttaskHandler(datas,i);\n\t\t\t\ti++\n\t\t\t}\n\t\t\t_run()\n\t\t})\n\t}\n}\n\t\t\n\t\t",
+		"title": "performChunk.js\n"
+	}, {
+		"lang": "html",
+		"code": "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<meta charset=\"utf-8\">\n\t\t<title></title>\n\t</head>\n\t<body>\n\t\t<button id=btn1>click</button>\n\t\t<div id='div1'></div>\n\t\t<script >\n\t\t\tconst btn=document.getElementById('btn1')\n\t\t\tconst data=new Array(100000).fill(0).map((_,i)=>i)\n\t\t\tconst div1=document.getElementById('div1')\n\t\t\t\n\t\t\tbtn.onclick=function(){\n\t\t\t\tlet i=0\n\t\t\t\tperformChunk(data,task)\n\t\t\t}\n\t\t\t\n\t\t\tfunction task(arr,i){\n\t\t\t\tlet div=document.createElement('div')\n\t\t\t\tdiv.innerText=i\n\t\t\t\tdiv1.appendChild(div)\n\t\t\t}\n\t\t\t\n\t\t\tfunction performChunk(datas,taskHandler){\n\t\t\t\tif(datas.length===0){\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tlet i=0;\n\t\t\t\t_run();\n\t\t\t\t\n\t\t\t\tfunction _run(){\n\t\t\t\t\tif(i>=datas.length){\n\t\t\t\t\t\treturn\n\t\t\t\t\t}\n\t\t\t\t\trequestIdleCallback((idle)=>{\n\t\t\t\t\t\twhile(idle.timeRemaining()>0 && i<datas.length){\n\t\t\t\t\t\t\ttaskHandler(datas,i);\n\t\t\t\t\t\t\ti++\n\t\t\t\t\t\t}\n\t\t\t\t\t\t_run()\n\t\t\t\t\t})\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t</script>\n\t</body>\n</html>\n\t\t\n\t\t",
+		"title": "测试代码\n"
+	}],
+	"createTime": 1733992232379,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "675aa2e383028b219b63c7bc",
+	"title": "scheduler.yield()函数",
+	"category": "#js",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "\n<!DOCTYPE html>\n<html lang=\"en\">\n\t<head>\n\t\t<meta charset=\"UTF-8\" />\n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n\t\t<title></title>\n\t\t\n\t</head>\n  <body>\n    <div id=\"app\">请点击开始</div><br>\n\t\t<div id='btnDiv'>\n\t\t\t<button onclick='btn1()'>开始</button><span>执行10秒的循环：使用scheduler.yield()</span><br><br>\n\t\t\t<button onclick='btn2()'>开始</button><span>执行10秒的循环：直接循环</span><br><br>\n\t\t\t<button onclick='btn3()'>开始</button><span>执行10秒的循环：使用setTimeout</span>\n\t\t</div>\n\t\t<script>\n\t\t\tfunction showButton(){\n\t\t\t\tdocument.getElementById('btnDiv').style.visibility='visible'\n\t\t\t}\n\t\t\t\n\t\t\tfunction hideButton(){\n\t\t\t\tdocument.getElementById('btnDiv').style.visibility='hidden'\n\t\t\t}\n\t\t\t\n\t\t\tfunction btn1(){\n\t\t\t\thideButton()\n\t\t\t\tsetTimeout(doLoopWithYield,10)\n\t\t\t}\n\t\t\t\n\t\t\tfunction btn2(){\n\t\t\t\thideButton()\n\t\t\t\tsetTimeout(doLoopWithoutYield,10)\n\t\t\t}\n\t\t\t\n\t\t\tfunction btn3(){\n\t\t\t\thideButton()\n\t\t\t\tsetTimeout(doLoopwithTimeout,10)\n\t\t\t}\n\t\t\t\n\t\t\tasync function doLoopWithYield(){\n\t\t\t\tconst end=performance.now()+10*1000\n\t\t\t\tlet i=0\n\t\t\t\twhile(performance.now()<end){\n\t\t\t\t\tdocument.getElementById('app').innerText=++i\n\t\t\t\t\tawait scheduler.yield();\n\t\t\t\t}\n\t\t\t\tshowButton()\n\t\t\t}\n\t\t\t\n\t\t\tasync function doLoopWithoutYield(){\n\t\t\t\tconst end=performance.now()+10*1000\n\t\t\t\tlet i=0\n\t\t\t\twhile(performance.now()<end){\n\t\t\t\t\tdocument.getElementById('app').innerText=++i\n\t\t\t\t}\n\t\t\t\tshowButton()\n\t\t\t}\n\t\t\t\n\t\t\tasync function doLoopwithTimeout(){\n\t\t\t\tconst end=performance.now()+10*1000\n\t\t\t\tlet i=0\n\t\t\t\twhile(performance.now()<end){\n\t\t\t\t\tawait fun1(++i)\n\t\t\t\t}\n\t\t\t\tshowButton()\n\t\t\t}\n\t\t\t\n\t\t\tfunction fun1(i){\n\t\t\t\treturn new Promise(rev=>{\n\t\t\t\t\tsetTimeout(()=>{\n\t\t\t\t\t\tdocument.getElementById('app').innerText=i;\n\t\t\t\t\t\trev()\n\t\t\t\t\t},0)\n\t\t\t\t})\n\t\t\t}\n\t\t</script>\n  </body>\n</html>\t\n\t\t",
+		"title": "test.html\n"
+	}],
+	"createTime": 1733993189015,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "67637cc6fdd21a368463df68",
+	"title": "js中导入文件内的模块",
+	"category": "#js",
+	"content": "这个示例本身没有什么作用，在文件内部的模块一般用全局变量的方式，主要是学习使用URL.createObjectURL方法",
+	"codes": [{
+		"lang": "javascript",
+		"code": " function importById(id){\n    var _id=document.getElementById(id)\n    var oMyBlob = new Blob([_id.innerText], {\n      type: 'text/javascript'\n    });\n    let url = URL.createObjectURL(oMyBlob)\n    return new Promise((rev)=>{\n      import(url).then(v => {\n        rev(v)\n      })\n    })\n  }",
+		"title": "importById\n"
+	}, {
+		"lang": "html",
+		"code": "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<meta charset=\"utf-8\">\n\t\t<title></title>\n\t</head>\n\t<body>\n\t\t<button id='btn1'>click</button>\n\t\t<script type=\"module\" id=\"js1\">\n\t\t  export function test() {\n\t\t    alert(\"hello\")\n\t\t  }\n\t\t  \n\t\t</script>\n\t\t<script type=\"module\">\n\t\t  importById(\"js1\").then(code=>{\n\t\t    document.getElementById('btn1').onclick=function(){\n\t\t      code.test()\n\t\t    }\n\t\t  })\n\t\t  function importById(id){\n\t\t    var _id=document.getElementById(id)\n\t\t    var oMyBlob = new Blob([_id.innerText], {\n\t\t      type: 'text/javascript'\n\t\t    });\n\t\t    let url = URL.createObjectURL(oMyBlob)\n\t\t    return new Promise((rev)=>{\n\t\t      import(url).then(v => {\n\t\t        rev(v)\n\t\t      })\n\t\t    })\n\t\t  }\n\t\t  \n\t\t</script>\n\t\t\n\n\t</body>\n</html>",
+		"title": "导入文件内模块的方法\n"
+	}, {
+		"lang": "html",
+		"code": "\n<script type=\"module\" id=\"js1\">\n  export function test() {\n    alert(\"hello\")\n  }\n  window.test=test\n</script>\n",
+		"title": "全局变量的方法\n"
+	}],
+	"createTime": 1734573257140,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676a10973085dc1b906d9f0d",
+	"title": "document.write和URL.createObjectURL",
+	"category": "#js,#html",
+	"content": "示例为打开一个新页面，然后在页面显示内容。可以用于页面的示例展示。",
+	"codes": [{
+		"lang": "html",
+		"code": "<body><script>\nconst code=`\n<!DOCTYPE html>\n<html>\n  <head>\n    <script type=\"importmap\">\n      {\n        \"imports\": {\n          \"preact\": \"https://esm.sh/preact@10.23.1\",\n          \"preact/\": \"https://esm.sh/preact@10.23.1/\",\n          \"@preact/signals\": \"https://esm.sh/@preact/signals@1.3.0?external=preact\",\n          \"htm/preact\": \"https://esm.sh/htm@3.1.1/preact?external=preact\",\n\t\t\t\t\t\"styled\":\"https://mp-4c96edd9-16e0-488f-8d15-50c0d774125a.cdn.bspapp.com/src/styled.js?k=3\"\n        }\n      }\n    <${'/script'}>\n  </head>\n  <body>\n    <div id=\"app\"></div>\n\n    <script type=\"module\">\n      import { render } from 'preact';\n      import { html } from 'htm/preact';\n\t\t\timport {signal} from '@preact/signals';\n\t\t\timport styled from 'styled';\n\t\t\t\n\t\t\tconst test=signal('test')\n\t\t\tconst style=styled\\`\n\t\t\t\th1{\n\t\t\t\t\tcolor:red;\n\t\t\t\t\tfont-size:80px;\n\t\t\t\t}\n\t\t\t\tbutton{\n\t\t\t\t\tfont-size:50px;\n\t\t\t\t\tmargin:20px;\n\t\t\t\t}\n\t\t\t\\`\n\n      export function App() {\n        return html\\`<$\\{style}>\n          <h1>$\\{test.value}</h1>\n\t\t\t\t\t<button onClick=$\\{()=>{test.value=(test.value=='test'?'hello':'test')}}>click</button>\n\t\t\t\t\t<//>\n        \\`;\n      }\n\n      render(html\\`<$\\{App} />\\`, document.getElementById('app'));\n    <${'/script'}>\n  </body>\n</html>\t\t\n\t\t\n`\n\ndocument.write(code)\ndocument.close()\n</script></body>",
+		"title": "document.write\n注意，document.write执行完成后要document.close()关闭，这样才能显示异步的内容"
+	}, {
+		"lang": "html",
+		"code": "<body><script>\nconst code=`\n<!DOCTYPE html>\n<html>\n  <head>\n    <script type=\"importmap\">\n      {\n        \"imports\": {\n          \"preact\": \"https://esm.sh/preact@10.23.1\",\n          \"preact/\": \"https://esm.sh/preact@10.23.1/\",\n          \"@preact/signals\": \"https://esm.sh/@preact/signals@1.3.0?external=preact\",\n          \"htm/preact\": \"https://esm.sh/htm@3.1.1/preact?external=preact\",\n\t\t\t\t\t\"styled\":\"https://mp-4c96edd9-16e0-488f-8d15-50c0d774125a.cdn.bspapp.com/src/styled.js?k=3\"\n        }\n      }\n    <${'/script'}>\n  </head>\n  <body>\n    <div id=\"app\"></div>\n\n    <script type=\"module\">\n      import { render } from 'preact';\n      import { html } from 'htm/preact';\n\t\t\timport {signal} from '@preact/signals';\n\t\t\timport styled from 'styled';\n\t\t\t\n\t\t\tconst test=signal('test')\n\t\t\tconst style=styled\\`\n\t\t\t\th1{\n\t\t\t\t\tcolor:red;\n\t\t\t\t\tfont-size:80px;\n\t\t\t\t}\n\t\t\t\tbutton{\n\t\t\t\t\tfont-size:50px;\n\t\t\t\t\tmargin:20px;\n\t\t\t\t}\n\t\t\t\\`\n\n      export function App() {\n        return html\\`<$\\{style}>\n          <h1>$\\{test.value}</h1>\n\t\t\t\t\t<button onClick=$\\{()=>{test.value=(test.value=='test'?'hello':'test')}}>click</button>\n\t\t\t\t\t<//>\n        \\`;\n      }\n\n      render(html\\`<$\\{App} />\\`, document.getElementById('app'));\n    <${'/script'}>\n  </body>\n</html>\t\t\n\t\t\n`\n\nvar oMyBlob = new Blob([code], {\n\ttype: 'text/html'\n});\nconst URL=window.URL || window.webkitURL\nlet url = URL.createObjectURL(oMyBlob)\nconst win = window.open(url, \"_blank\");\nwin.onunload=function(){\n\tconsole.log('close')\n\tURL.revokeObjectURL(url) //最后要释放内存\n} \n</script></body>",
+		"title": "URL.createObjectURL\n电脑端能正常工作，手机端不能工作。还不知道原因"
+	}],
+	"createTime": 1735004313586,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676ab89fe1c794ceee4bab7a",
+	"title": "平衡二叉树",
+	"category": "",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "\n\n<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<meta charset=\"utf-8\">\n\t\t<meta name=\"viewport\" content=\"initial-scale=1.0, maximum-scale=1.0, user-scalable=no\" />\n\t\t<title></title>\n\t\t\n\n\t</head>\n\t<body>\n\t\t<div id=\"div-body\">\n\t\t\t<table id=\"tb\">\n\n\t\t\t</table>\n\t\t</div>\n\t\t<script>\n\t\t\n\t\t\tfunction showTree(now, parent) {\n\t\t\t\tlet divTop, divDown, divDownLeft, divDownRight\n\t\t\t\tdivTop = document.createElement(\"div\")\n\t\t\t\tdivDown = document.createElement(\"div\")\n\t\t\t\tdivDownLeft = document.createElement(\"div\")\n\t\t\t\tdivDownRight = document.createElement(\"div\")\n\t\t\t\tdivTop.className = \"div-top\"\n\t\t\t\tdivDown.className = \"div-down\"\n\t\t\t\tdivDownLeft.className = \"div-down-left\"\n\t\t\t\tdivDownRight.className = \"div-down-right\"\n\t\t\t\tdivTop.innerText = now.value\n\t\t\t\tparent.appendChild(divTop)\n\t\t\t\tparent.appendChild(divDown)\n\t\t\t\tdivDown.appendChild(divDownLeft)\n\t\t\t\tdivDown.appendChild(divDownRight)\n\t\t\t\tif (now.left != null) {\n\t\t\t\t\tshowTree(now.left, divDownLeft)\n\t\t\t\t}\n\t\t\t\tif (now.right != null) {\n\t\t\t\t\tshowTree(now.right, divDownRight)\n\t\t\t\t}\n\n\t\t\t}\n\n\t\t\t\n\t\t</script>\n\t\t<script>\n\t\t\t/**\n\t\t\t *\n\t\t\t 平衡二叉树\n\t\t\t *\n\t\t\t */\n\n\t\t\t//创建AVLTree\n\t\t\tclass AVLTree {\n\t\t\t\troot;\n\t\t\t\t//添加节点的方法\n\t\t\t\tadd(value) {\n\t\t\t\t\tlet node=new Node(value)\n\t\t\t\t\tif (!this.root) {\n\t\t\t\t\t\tthis.root = node;\n\t\t\t\t\t} else {\n\t\t\t\t\t\tthis.root.add(node);\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t//查找要删除的节点\n\t\t\t\tsearch(value) {\n\t\t\t\t\tif (this.root == null) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t} else {\n\t\t\t\t\t\treturn this.root.search(value);\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t//查找要删除的父节点\n\t\t\t\tsearchParent(value) {\n\t\t\t\t\tif (this.root == null) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t} else {\n\t\t\t\t\t\treturn this.root.searchParent(value);\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t//删除节点\n\t\t\t\tdelNode(value) {\n\t\t\t\t\tif (this.root == null) {\n\t\t\t\t\t\treturn\n\t\t\t\t\t} else {\n\t\t\t\t\t\t//1.需求找到要删除的节点，targetNode\n\t\t\t\t\t\tlet targetNode = this.search(value);\n\t\t\t\t\t\t//如果没有找到要删除的节点\n\t\t\t\t\t\tif (targetNode == null) {\n\t\t\t\t\t\t\treturn\n\t\t\t\t\t\t}\n\t\t\t\t\t\t//如果我们发现当前这颗二叉排序树只有一个节点\n\t\t\t\t\t\tif (this.root.left == null && this.root.right == null) {\n\t\t\t\t\t\t\tthis.root = null;\n\t\t\t\t\t\t\treturn;\n\t\t\t\t\t\t}\n\t\t\t\t\t\t//去找到targetNode的父节点\n\t\t\t\t\t\tlet parent = this.searchParent(value);\n\t\t\t\t\t\t//如果要删除的节点是叶子节点\n\t\t\t\t\t\tif (targetNode.left == null && targetNode.right == null) {\n\t\t\t\t\t\t\t//判断targetNode是父节点的左子节点，还是右子节点\n\t\t\t\t\t\t\tif (parent.left && parent.left.value === value) {\n\t\t\t\t\t\t\t\tparent.left = null;\n\t\t\t\t\t\t\t} else if (parent.right && parent.right.value === value) {\n\t\t\t\t\t\t\t\tparent.right = null;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t} else if (targetNode.left && targetNode.right) {\n\t\t\t\t\t\t\t//删除有两颗子树的节点\n\t\t\t\t\t\t\tlet minValue = this.delRightTreeMin(targetNode.right);\n\t\t\t\t\t\t\ttargetNode.value = minValue;\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t//删除有一颗子树的节点\n\t\t\t\t\t\t\t//如果要删除的节点有左子节点\n\t\t\t\t\t\t\tif (targetNode.left) {\n\t\t\t\t\t\t\t\tif (parent == null) { //要删除的节点是根节点\n\t\t\t\t\t\t\t\t\tthis.root = targetNode.left;\n\t\t\t\t\t\t\t\t} else if (parent.left.value === value) {\n\t\t\t\t\t\t\t\t\tparent.left = targetNode.left\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\tparent.right = targetNode.left\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t} else { //如果要删除的节点有右子节点\n\t\t\t\t\t\t\t\tif (parent == null) { //要删除的节点是根节点\n\t\t\t\t\t\t\t\t\tthis.root = targetNode.right\n\t\t\t\t\t\t\t\t} else if (parent.left.value === value) {\n\t\t\t\t\t\t\t\t\tparent.left = targetNode.right\n\t\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\t\tparent.right = targetNode.right\n\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t}\n\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t/**\n\t\t\t\t * 1.返回的以node为根节点的二叉树的最小节点的值\n\t\t\t\t * 2.删除以node为根节点的二叉树的最小节点\n\t\t\t\t * @param {传入的节点，当做二叉排序树的根节点} node \n\t\t\t\t */\n\t\t\t\tdelRightTreeMin(node) {\n\t\t\t\t\tlet target = node;\n\t\t\t\t\t//循环的查找左子节点，就会找到最小值\n\t\t\t\t\twhile (target.left) {\n\t\t\t\t\t\ttarget = target.left\n\t\t\t\t\t}\n\t\t\t\t\t//这时target就指向了最小节点\n\t\t\t\t\t//删除最小节点\n\t\t\t\t\tthis.delNode(target.value);\n\t\t\t\t\treturn target.value;\n\t\t\t\t}\n\n\t\t\t\t//中序遍历\n\t\t\t\tinfixOrder() {\n\t\t\t\t\tif (!this.root) {\n\t\t\t\t\t\treturn\n\t\t\t\t\t} else {\n\t\t\t\t\t\tlet list = [];\n\t\t\t\t\t\tthis.root.infixOrder(list);\n\t\t\t\t\t\treturn list;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t\n\t\t\t}\n\n\t\t\t//创建node节点\n\t\t\tclass Node {\n\t\t\t\tvalue;\n\t\t\t\tleft;\n\t\t\t\tright;\n\t\t\t\tconstructor(value) {\n\t\t\t\t\tthis.value = value;\n\t\t\t\t}\n\n\t\t\t\t//返回左子树的高度\n\t\t\t\tleftHeight() {\n\t\t\t\t\tif (this.left == null) {\n\t\t\t\t\t\treturn 0\n\t\t\t\t\t}\n\t\t\t\t\treturn this.left.height();\n\t\t\t\t}\n\n\t\t\t\t//返回右子树的高度\n\t\t\t\trightHeight() {\n\t\t\t\t\tif (this.right == null) {\n\t\t\t\t\t\treturn 0\n\t\t\t\t\t}\n\t\t\t\t\treturn this.right.height();\n\t\t\t\t}\n\n\t\t\t\t//左旋转\n\t\t\t\tleftRotate() {\n\t\t\t\t\t//创建新的节点，以当前根节点的值\n\t\t\t\t\tlet newNode = new Node(this.value);\n\t\t\t\t\t//把新的节点的左子树设置成当前节点的左子树\n\t\t\t\t\tnewNode.left = this.left;\n\t\t\t\t\t//把新的节点的右子树设置成过去节点的右子树的左子树\n\t\t\t\t\tnewNode.right = this.right.left;\n\t\t\t\t\t//把当前节点的值替换成右子节点的值\n\t\t\t\t\tthis.value = this.right.value;\n\t\t\t\t\t//把当前节点的右子树设置成当前节点右子树的右子树\n\t\t\t\t\tthis.right = this.right.right\n\t\t\t\t\t//把当前节点的左子树设置成新的节点\n\t\t\t\t\tthis.left = newNode;\n\t\t\t\t}\n\n\t\t\t\t//右旋转\n\t\t\t\trightRotate() {\n\t\t\t\t\tlet newNode = new Node(this.value);\n\t\t\t\t\tnewNode.right = this.right;\n\t\t\t\t\tnewNode.left = this.left.right;\n\t\t\t\t\tthis.value = this.left.value;\n\t\t\t\t\tthis.left = this.left.left;\n\t\t\t\t\tthis.right = newNode;\n\t\t\t\t}\n\n\t\t\t\t//返回当前节点的高度，以该节点为根节点的树的高度\n\t\t\t\theight() {\n\t\t\t\t\treturn Math.max(this.left == null ? 0 : this.left.height(),\n\t\t\t\t\t\tthis.right == null ? 0 : this.right.height()) + 1;\n\t\t\t\t}\n\n\t\t\t\t//添加节点的方法\n\t\t\t\t//递归的形式添加节点，注意需要满足二叉排序树的要求\n\t\t\t\tadd(node) {\n\t\t\t\t\tif (node == null) {\n\t\t\t\t\t\treturn;\n\t\t\t\t\t}\n\t\t\t\t\t//判断传入的节点的值，和当前子树的根节点的值关系\n\t\t\t\t\tif (node.value < this.value) {\n\t\t\t\t\t\tif (!this.left) { //如果左子节点为空\n\t\t\t\t\t\t\tthis.left = node;\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t//递归的向左子树添加\n\t\t\t\t\t\t\tthis.left.add(node);\n\t\t\t\t\t\t}\n\t\t\t\t\t} else { //\n\t\t\t\t\t\tif (!this.right) { //添加的节点的值大于当前节点的值\n\t\t\t\t\t\t\tthis.right = node;\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t//递归的向右子树添加\n\t\t\t\t\t\t\tthis.right.add(node);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\n\t\t\t\t\t//当添加完一个节点后，如果右子树的高度-左子树的高度>1，左选择\n\t\t\t\t\tif (this.rightHeight() - this.leftHeight() > 1) {\n\t\t\t\t\t\t//如果的它的右子树的左子树大于它的右子树的右子树的高度\n\t\t\t\t\t\tif (this.right && this.right.leftHeight() > this.right.rightHeight()) {\n\t\t\t\t\t\t\t//先对其当前节点的右子树进行右旋转\n\t\t\t\t\t\t\tthis.right.rightRotate();\n\t\t\t\t\t\t}\n\t\t\t\t\t\t//左旋转\n\t\t\t\t\t\tthis.leftRotate();\n\t\t\t\t\t\treturn; //阻止继续判断\n\t\t\t\t\t}\n\t\t\t\t\t//当添加完后，如果左子树的高度-右子树的高度>1,右旋转\n\t\t\t\t\tif (this.leftHeight() - this.rightHeight() > 1) {\n\t\t\t\t\t\t//如果它的左子树的右子树大于它的左子树的左子树的高度\n\t\t\t\t\t\tif (this.left && this.left.rightHeight() > this.left.leftHeight()) {\n\t\t\t\t\t\t\t//先对其当前节点的左节点进行左旋转\n\t\t\t\t\t\t\tthis.left.leftRotate();\n\t\t\t\t\t\t}\n\t\t\t\t\t\tthis.rightRotate();\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t//查找要删除的节点\n\t\t\t\tsearch(value) {\n\t\t\t\t\tif (value == this.value) { //找到就是该节点\n\t\t\t\t\t\treturn this;\n\t\t\t\t\t} else if (value < this.value) { //如果查找的值小于当前节点，向左子树递归查找\n\t\t\t\t\t\t//如果左子节点为空\n\t\t\t\t\t\tif (this.left == null) {\n\t\t\t\t\t\t\treturn null;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn this.left.search(value);\n\t\t\t\t\t} else { //如果查找的值不小于当前节点，向右子树递归查找\n\t\t\t\t\t\tif (this.right == null) {\n\t\t\t\t\t\t\treturn null;\n\t\t\t\t\t\t}\n\t\t\t\t\t\treturn this.right.search(value)\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t//查找要删除节点的父节点\n\t\t\t\t/**\n\t\t\t\t * \n\t\t\t\t * @param {要找到的节点的值} value\n\t\t\t\t * @returns 返回的是要删除的节点的父节点，如果没有就返回null\n\t\t\t\t * \n\t\t\t\t *  \n\t\t\t\t */\n\t\t\t\tsearchParent(value) {\n\t\t\t\t\t//如果当前节点就是要删除的结点的父节点，就返回\n\t\t\t\t\tif ((this.left && this.left.value === value) ||\n\t\t\t\t\t\t(this.right && this.right.value === value)) {\n\t\t\t\t\t\treturn this;\n\t\t\t\t\t} else {\n\t\t\t\t\t\t//如果查找的值小于当前节点的值，并且当前节点的左子节点不为空\n\t\t\t\t\t\tif (value < this.value && this.left) {\n\t\t\t\t\t\t\t//向左子树递归查找\n\t\t\t\t\t\t\treturn this.left.searchParent(value);\n\t\t\t\t\t\t} else if (value >= this.value && this.right) {\n\t\t\t\t\t\t\t//向右子树递归查找\n\t\t\t\t\t\t\treturn this.right.searchParent(value);\n\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\treturn null; //没有找到父节点\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t//中序遍历\n\t\t\t\tinfixOrder(arr) {\n\t\t\t\t\tif (this.left) {\n\t\t\t\t\t\tthis.left.infixOrder(arr)\n\t\t\t\t\t}\n\t\t\t\t\tarr.push(this);\n\t\t\t\t\tif (this.right) {\n\t\t\t\t\t\tthis.right.infixOrder(arr)\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\t// let arr1 = [4, 3, 6, 5, 7, 8]; //左旋转\n\t\t\tlet arr1=[]\n\t\t\tlet arr5=arr1.reverse()\n\t\t\tlet arr2 = [10, 12, 8, 9, 7, 6]; //右旋转\n\t\t\tlet arr3 = [10, 11, 7, 6, 8, 9]; //双旋转\n\t\t\tfor(let i=0;i<15;i++){\n\t\t\t\tarr1.push(parseInt(Math.random()*1000))\n\t\t\t}\n\n\t\t\tlet avlTree1 = new AVLTree();\n\t\t\tconsole.time(\"time1\")\n\t\t\tfor (let i = 0; i < arr1.length; i++) {\n\t\t\t\tavlTree1.add(arr5[i])\n\t\t\t}\n\t\t\tconsole.timeEnd(\"time1\")\n\t\t\tshowTree(avlTree1.root,document.getElementById(\"div-body\"))\n\t\t\tconsole.log(\"左旋转平衡处理：\");\n\t\t\tconsole.log('中序遍历：', avlTree1.infixOrder());\n\t\t\tconsole.log(\"树高度：\", avlTree1.root.height());\n\t\t\tconsole.log(\"树的左子树高度：\", avlTree1.root.leftHeight());\n\t\t\tconsole.log(\"树的右子树高度：\", avlTree1.root.rightHeight());\n\n\t\t\tlet avlTree2 = new AVLTree();\n\t\t\tfor (let i = 0; i < arr2.length; i++) {\n\t\t\t\tavlTree2.add(arr2[i])\n\t\t\t}\n\t\t\tconsole.log(\"右旋转平衡处理：\");\n\t\t\tconsole.log('中序遍历：', avlTree2.infixOrder());\n\t\t\tconsole.log(\"树高度：\", avlTree2.root.height());\n\t\t\tconsole.log(\"树的左子树高度：\", avlTree2.root.leftHeight());\n\t\t\tconsole.log(\"树的右子树高度：\", avlTree2.root.rightHeight());\n\n\t\t\tlet avlTree3 = new AVLTree();\n\t\t\tfor (let i = 0; i < arr3.length; i++) {\n\t\t\t\tavlTree3.add(arr3[i])\n\t\t\t}\n\t\t\tconsole.log(\"双旋转平衡处理：\");\n\t\t\tconsole.log('中序遍历：', avlTree3.infixOrder());\n\t\t\tconsole.log(\"树高度：\", avlTree3.root.height());\n\t\t\tconsole.log(\"树的左子树高度：\", avlTree3.root.leftHeight());\n\t\t\tconsole.log(\"树的右子树高度：\", avlTree3.root.rightHeight());\n\t\t</script>\n\t\t\n\n\t\t<style>\n\t\t\t#div-body {\n\t\t\t\twidth: 100%;\n\t\t\t}\n\n\t\t\t.div-top {\n\t\t\t\twidth: 100%;\n\t\t\t\ttext-align: center;\n\t\t\t\tborder: #ccc solid 1px;\n\t\t\t\tpadding-top: 5px;\n\t\t\t\tpadding-bottom: 5px;\n\t\t\t}\n\n\t\t\t.div-down {\n\t\t\t\tposition: relative;\n\t\t\t\twidth: 100%;\n\t\t\t\tmargin-top: 5px;\n\t\t\t}\n\n\t\t\t.div-down-left {\n\t\t\t\tposition: relative;\n\t\t\t\twidth: 48%;\n\t\t\t\tleft: 0px;\n\t\t\t\ttop: 0px;\n\t\t\t}\n\n\t\t\t.div-down-right {\n\t\t\t\tposition: absolute;\n\t\t\t\twidth: 50%;\n\t\t\t\tleft: 50%;\n\t\t\t\ttop: 0px;\n\t\t\t}\n\n\t\t\n\t\t</style>\n\t</body>\n</html>\n",
+		"title": "\n"
+	}],
+	"createTime": 1735047330350,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676ab956d22d9c7cd0ce239e",
+	"title": "判断数据类型",
+	"category": "#js",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n//判断数据类型\nfunction type(obj){\n  return Object.prototype.toString.call(obj)\n}\n    \n      \n    \ntype(1)      //[object Number]\ntype([1])                //[object Array]\ntype(null)          //[object Null]\ntype(true)           //[object Boolean]\ntype(function(){})          //[object Function]\ntype(undefined)        //[object Undefined]\ntype(parseInt(\"a\"))     //[object Number]",
+		"title": "\n"
+	}],
+	"createTime": 1735047512739,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676ab9d8159573a8f4b8785e",
+	"title": "浏览器插件",
+	"category": "#html",
+	"content": "在浏览器中打开浏览器扩展，打开开发模式，选择插件所在文件夹打开即可",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n {\n  \"name\": \"test\",\n  \"manifest_version\": 3,\n  \"version\": \"2\",\n  \"description\": \"test\",\n  \n  \"content_scripts\": [{\n    \"matches\": [\"https://admin.mitangtuan.com/*\"],\n    \"js\": [\"myscript.js\"]\n  }]\n }\n",
+		"title": "manifest.json\n"
+	}, {
+		"lang": "javascript",
+		"code": "\n (function() {\n  var reg = new RegExp(\"admin.mitangtuan.com/admin/common/login\", \"i\");\n  var href = location.href;\n  if (reg.test(href))\n    setTimeout(function() {\n      var name = document.getElementById('username')\n      var pass = document.getElementById('password')\n      name.value = '*******'\n      pass.value = '*******'\n    }, 200)\n })();",
+		"title": "myscript.js\n"
+	}],
+	"createTime": 1735047643111,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676aba1024cebbe6e5400ddc",
+	"title": "bat文件同时打开两个窗口",
+	"category": "",
+	"content": "还可以在一个窗口中同时运行两条命令，在同步编译时有用，需要安装插件，可以在网上查找。",
+	"codes": [{
+		"lang": "html",
+		"code": "\n        \n :: 安装\n :: npm init -y\n :: npm install babel-cli@6 babel-preset-react-app@3\n :: start 两条指令同时运行\n start npx babel --watch ./test/src --out-dir ./test --presets react-app/prod\n start wpsjs debug\n \n      \n",
+		"title": "\n"
+	}],
+	"createTime": 1735047699408,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676aba69facfd515dd399038",
+	"title": "在vue中使用preact",
+	"category": "#vue,#preact",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "\n          \n$ npm i preact               \n$ npm i htm      \n        ",
+		"title": "安装依赖\n"
+	}, {
+		"lang": "javascript",
+		"code": "\n        \n<template>\n  <div id=\"root\"></div>\n</template>\n\n<script>\n  import { render, h } from 'preact';\n  import { useState } from 'preact/hooks';\n  import htm from 'htm';\n\n  const html = htm.bind(h);\n\n  function Pre() {\n    return html`\n      <button onClick=${() => alert('hello preact')}>click</button>\n    `;\n  }\n\n  export default {\n    mounted() {\n      render(\n        html`\n          <${Pre} />\n        `,\n        document.getElementById('root'),\n      );\n    },\n  };\n</script>\n    \n      ",
+		"title": "代码实例\nindex.vue"
+	}],
+	"createTime": 1735047788499,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676abbd32053d52ab96471bb",
+	"title": "4个强大JavaScript运算符--- ??(非空运算符), ??=(空赋值运算符), ?.(链判断运算符), ?=(三元运算符)",
+	"category": "#js",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n          \nnull ?? 5 // => 5\n3 ?? 5 // => 3\n  \n//给变量设置默认值时，以前常用 ||逻辑或运算符，例如，\n\n\n          \nvar prevMoney = 1\nvar currMoney = 0\nvar noAccount = null\nvar futureMoney = -1\nfunction moneyAmount(money) {\n    return money || `账户未开通`\n}\nconsole.log(moneyAmount(prevMoney)) // => 1\nconsole.log(moneyAmount(currMoney)) // => 账户未开通\nconsole.log(moneyAmount(noAccount)) // => 账户未开通\nconsole.log(moneyAmount(futureMoney)) // => -1\n        \n//上面我们创建了函数 moneyAmount，它返回当前用户余额。我们使用 || 运算符来识别没有帐户的用户。 然而，当用户没有帐户时，这意味着什么？将无账户视为空而不是 0 更为准确，因为银行账户可能没有（或负）货币。 在上面的例子中，|| 运算符将 0 视为一个虚假值，不应该包括用户有 0 美元的帐户。让我们使用?? 非空运算符来解决这个问题：\n\n\n          \nvar currMoney = 0\nvar noAccount = null\nfunction moneyAmount(money) {\n  return money ?? `账户未开通`\n}\n \nmoneyAmount(currMoney) // => 0\nmoneyAmount(noAccount) // => `账户未开通`\n        \n//概括地说 ?? 运算符允许我们在忽略错误值（如 0 和空字符串）的同时指定默认值\n",
+		"title": "?? 非空运算符\n在 JS 中，?? 运算符被称为非空运算符。如果第一个参数不是 null/undefined（译者注：这里只有两个假值，但是 JS 中假值包含：未定义 undefined、空对象 null、数值 0、空数字 NaN、布尔 false，空字符串''，不要搞混了），将返回第一个参数，否则返回第二个参数。比如"
+	}, {
+		"lang": "javascript",
+		"code": "//??= 也被称为空赋值运算符，与上面的非空运算符相关。看看它们之间的联系：\n\n          \nvar x = null\nvar y = 5\n \nconsole.log(x ??= y) // => 5\nconsole.log(x = (x ?? y)) // => 5\n        \n//仅当值为 null 或 undefined 时，此赋值运算符才会赋值。上面的例子强调了这个运算符本质上是空赋值的语法糖（译者注，类似的语法糖：a = a + b 可写成 a += b ）。接下来，让我们看看这个运算符与默认参数（译者注，默认参数是 ES6 引入的新语法，仅当函数参数为 undefined 时，给它设置一个默认值）的区别\n\n          \nfunction gameSettingsWithNullish(options) {\n  options.gameSpeed ??= 1\n  options.gameDiff ??= 'easy' \n  return options\n}\nfunction gameSettingsWithDefaultParams(gameSpeed=1, gameDiff='easy') {\n  return {gameSpeed, gameDiff}\n}\n \ngameSettingsWithNullish({gameSpeed: null, gameDiff: null}) // => {gameSpeed: 1, gameDiff: 'easy'}\ngameSettingsWithDefaultParams(undefined, null) // => {gameSpeed: null, gameDiff: null}\n        \n//上述函数处理空值的方式有一个值得注意的区别。默认参数将用空参数（译者注，这里的空参数，只能是 undefined）覆盖默认值，空赋值运算符将不会。默认参数和空赋值都不会覆盖未定义的值。\n\n          \nfunction gameSettingsWithNullish(options) {\n  options.gameSpeed ??= 1\n  options.gameDiff ??= 'easy' \n  return options\n}\nfunction gameSettingsWithDefaultParams(gameSpeed=1, gameDiff='easy') {\n  return {gameSpeed, gameDiff}\n}\n \ngameSettingsWithNullish({gameSpeed: null, gameDiff: null}) // => {gameSpeed: 1, gameDiff: 'easy'}\ngameSettingsWithDefaultParams(undefined, null) // => {gameSpeed: null, gameDiff: null}\n        \n",
+		"title": "??= 空赋值运算符\n"
+	}, {
+		"lang": "javascript",
+		"code": "\n          \nvar travelPlans = {\n  destination: 'DC',\n  monday: {\n    location: 'National Mall',\n    budget: 200\n  }\n}\nconsole.log(travelPlans.tuesday?.location) // => undefined\n\n        \n",
+		"title": "?. 链判断运算符\n链判断运算符?. 允许开发人员读取深度嵌套在对象链中的属性值，而不必验证每个引用。当引用为空时，表达式停止计算并返回 undefined。比如："
+	}, {
+		"lang": "javascript",
+		"code": "\n          \nfunction checkCharge(charge) {\n  return (charge > 0) ? '可用' : '需充值' \n}\nconsole.log(checkCharge(20)) // => 可用\nconsole.log(checkCharge(0)) // => 需充值\n\n        ",
+		"title": "?: 三元运算符\n?: 又叫条件运算符，接受三个运算数：条件 ? 条件为真时要执行的表达式 : 条件为假时要执行的表达式。实际效果"
+	}],
+	"createTime": 1735048150036,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676abc1132a4a4a425528792",
+	"title": "在vite中编译htm",
+	"category": "",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n          \n创建项目\n$ npx omi-cli init my-app\n$ cd my-app           \n$ npm start           # develop\n$ npm run build       # release\n\n创建组件\n$ npx omi-cli init-component my-component\n$ cd my-app           \n$ npm start           # develop\n$ npm run build       # release\n\n\n更新 cli 最新版本\n$ npm i omi-cli -g \n\n\n在vite中编译htm（如果在babel中编译省略步骤3和4）\n\n1.安装htm\nnpm i htm\n\n2.安装编译插件\nnpm i babel-plugin-htm\n\n3.vite中配置babel\nnpm i vite-plugin-babel @babel/core -D\n\n4.在vite.config.js中配置\nimport babel from \"vite-plugin-babel\";\nexport default {\n  plugins: [\n    babel()\n  ]\n};\n\n5.在.babelrc中配置babel插件\n{\n  \"plugins\": [\n    [\"htm\", {\n      \"pragma\": \"h\"\n    }]\n  ]\n}\n\n6.可以编译htm中的内容\n        ",
+		"title": "\n"
+	}],
+	"createTime": 1735048212452,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676de1f76ee53b982b509526",
+	"title": "vite动态加载外部js免打包实现",
+	"category": "#js",
+	"content": "static目录不打包指的发行时候，不对static目录内的文件编译压缩。但是如页面import了某个js文件，该文件是会被编译打包的。例如用import.meta.glob动态引用后，发布时会被编译，例如H5发布后，在unpackagedist\buildh5assets里",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n//dynamicForm的某method方法里\n\nvar that=this; \n//单个文件导入写法\nconst formjsurl = '/static/form/js/' + this.bizinfo[0].formGuid + '.js';\nthis.formjs = import(`/static/form/js/${formguid}.js`);\nconsole.log(this.formjs);\n\n//多个文件导入写法\nconst modules =import.meta.glob('/static/form/js/*.js'); \nconsole.log(modules);\t\t\t\t\t\t\t\n//获取当前表单js模型\nmodules[formjsurl]().then(({\n\tdefault: theDefault\n        }) => {\n\t  that.formjs = theDefault;\n\t  console.log(that.formjs);\n\t}).catch(err => {\n\t  console.log(err);\n\t});\n\t\t",
+		"title": "import.meta.glob动态引用\n"
+	}],
+	"createTime": 1735254519439,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "676e7a770f88ddd2f83e56f2",
+	"title": "网页变为可编辑",
+	"category": "#js",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n        \n document.designMode='on'\n      ",
+		"title": "\n"
+	}],
+	"createTime": 1735293561517,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6774f4d94eeb019992d3cace",
+	"title": "uniapp使用vue-router",
+	"category": "#vue",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "npm install vue-router --save",
+		"title": "安装插件\n通过 npm 安装 vue-router"
+	}, {
+		"lang": "javascript",
+		"code": "import Vue from 'vue'\nimport Router from 'vue-router'\n\nVue.use(Router)\n\nconst router = new Router({\n  routes: [\n    {\n      path: '/home',\n      name: 'Home',\n      component: () => import('@/pages/Home.vue'),\n      children: [\n        {\n          path: 'dashboard',\n          name: 'Dashboard',\n          component: () => import('@/pages/Home/Dashboard.vue'),\n        },\n        {\n          path: 'profile',\n          name: 'Profile',\n          component: () => import('@/pages/Home/Profile.vue'),\n        },\n      ],\n    },\n    {\n      path: '/about',\n      name: 'About',\n      component: () => import('@/pages/About.vue'),\n    },\n  ],\n})\n\nexport default router",
+		"title": "配置路由\n在 src/router/index.js 中配置路由信息"
+	}, {
+		"lang": "html",
+		"code": "<template>\n  <view>\n    <simple-router-view></simple-router-view>\n  </view>\n</template>\n\n<script>\nexport default {\n  name: 'App',\n}\n</script>",
+		"title": "使用路由\n与 uni-simple-router 使用方式类似，在主组件中使用 <router-view> 来显示嵌套的路由组件。"
+	}],
+	"createTime": 1735718108697,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6792e29b3988e379f5df7f3a",
+	"title": "html中引入调用另一个公用html模板文件的方法",
+	"category": "#js,#html",
+	"content": "最近写网页的时候，发现页面都是用的同一个header头部、aside侧边栏和footer页脚，那么为什么不把这些写成一个模板文件，在页面中直接引入呢？这样还方便后期的修改维护。\n查了一下资料，发现html中引入调用另一个html的方法有很多种，我都尝试了一下，就把他们都列出来吧：\n其中推荐第一种和第三种，因为代码太长就写在最后了。其他的方法，可以自己尝试，看是不是适合你当前项目",
+	"codes": [{
+		"lang": "html",
+		"code": "<body> \n    <div id=\"page1\"></div>     <div id=\"page2\"></div> \n    <script> \n          $(\"#page1\").load(\"pagePage_1.html\");           $(\"#page2\").load(\"page/Page_2.html\");\n     </script>\n </body>",
+		"title": "需要借助jquery div+$(\"#page1\").load(\"b.html\") \n"
+	}, {
+		"lang": "html",
+		"code": "<head>\n</head>\n<body>\n   <div id=\"page1\">\n        <iframe align=\"center\" width=\"100%\" height=\"170\" src=\"page/Page_1.html\"  frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" scrolling=\"no\"></iframe>\n   </div>\n   <div id=\"page2\">\n        <iframe align=\"center\" width=\"100%\" height=\"170\" src=\"page/Page_2.html\"  frameborder=\"no\" border=\"0\" marginwidth=\"0\" marginheight=\"0\" scrolling=\"no\"></iframe>\n   </div>\n</body>",
+		"title": "iframe 会生成一个边框，需要重新设置一下样式，相当于在页面内嵌入了一个页面。\n"
+	}, {
+		"lang": "javascript",
+		"code": "(function(window, document, undefined) {\nvar Include39485748323 = function() {}\nInclude39485748323.prototype = {\n//倒序循环\nforEach: function(array, callback) {\nvar size = array.length;\nfor(var i = size - 1; i >= 0; i--){\ncallback.apply(array[i], [i]);\n}\n},\ngetFilePath: function() {\nvar curWwwPath=window.document.location.href;\nvar pathName=window.document.location.pathname;\nvar localhostPaht=curWwwPath.substring(0,curWwwPath.indexOf(pathName));\nvar projectName=pathName.substring(0,pathName.substr(1).lastIndexOf('/')+1);\nreturn localhostPaht+projectName;\n},\n//获取文件内容\ngetFileContent: function(url) {\nvar ie = navigator.userAgent.indexOf('MSIE') > 0;\nvar o = ie ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest();\no.open('get', url, false);\no.send(null);\nreturn o.responseText;\n},\nparseNode: function(content) {\nvar objE = document.createElement(\"div\");\nobjE.innerHTML = content;\nreturn objE.childNodes;\n},\nexecuteScript: function(content) {\nvar mac = /<script>([\\s\\S]*?)<\\/script>/g;\nvar r = \"\";\nwhile(r = mac.exec(content)) {\n    eval(r[1]);\n}\n},\ngetHtml: function(content) {\n    var mac = /<script>([\\s\\S]*?)<\\/script>/g;\n    content.replace(mac, \"\");\n    return content;\n},\ngetPrevCount: function(src) {\n    var mac = /\\.\\.\\//g;\n    var count = 0;\n    while(mac.exec(src)) {\n        count++;\n    }\n    return count;\n},\ngetRequestUrl: function(filePath, src) {\n    if(/http:\\/\\//g.test(src)){ return src; }\n    var prevCount = this.getPrevCount(src);\n    while(prevCount--) {\n        filePath = filePath.substring(0,filePath.substr(1).lastIndexOf('/')+1);\n    }\n    return filePath + \"/\"+src.replace(/\\.\\.\\//g, \"\");\n},\nreplaceIncludeElements: function() {\n    var $this = this;\n    var filePath = $this.getFilePath();\n    var includeTals = document.getElementsByTagName(\"include\");\n    this.forEach(includeTals, function() {\n        //拿到路径  \n        var src = this.getAttribute(\"src\");\n        //拿到文件内容  \n        var content = $this.getFileContent($this.getRequestUrl(filePath, src));\n        //将文本转换成节点  \n        var parent = this.parentNode;\n        var includeNodes = $this.parseNode($this.getHtml(content));\n        var size = includeNodes.length;\n        for(var i = 0; i < size; i++) {\n            parent.insertBefore(includeNodes[0], this);\n        }\n        //执行文本中的额javascript  \n        $this.executeScript(content);\n        parent.removeChild(this);\n        //替换元素 this.parentNode.replaceChild(includeNodes[1], this);  \n    })\n}\n}\nwindow.onload = function() {\n    new Include39485748323().replaceIncludeElements();\n}\n})(window, document)",
+		"title": "通过一个 include.js 控制引入文件。\n1)将下方js文件代码保存成 include.js 文件引入；\n2)在页面中通过 <include src=\"\"><include> 载入模板文件。\n参考代码\n<include src=\"templates/header.html\"></include>"
+	}],
+	"createTime": 1737679511732,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "67a188d8a94d3591b9b98711",
+	"title": "在网页的地址栏中运行代码",
+	"category": "#js",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "(function() {\n\tvar reg = new RegExp(\"admin.mitangtuan.com/admin/common/login\", \"i\");\n\tvar href = location.href;\n\tif (reg.test(href))\n\t\tsetTimeout(function() {\n\t\t\tvar name = document.getElementById('username');\n\t\t\tvar pass = document.getElementById('password');\n\t\t\tname.value = '***';\n\t\t\tpass.value = '***';\n\t\t}, 200);\n})();\n\n\n//将runScript.js上传至可访问的服务器,访问地址假设为：https://crane.run/runScript.js\n//添加chrome浏览器书签。网址内容为：javascript:$.getScript('https://crane.run/runScript.js')\n//打开网站，点击上一步中添加的书签\n//文件名区分大小写\n",
+		"title": "\n"
+	}],
+	"createTime": 1738639586981,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "67e80cc6032a57e1a258949a",
+	"title": "原生 CSS scope 作用域来了",
+	"category": "",
+	"content": "基本语法如下\n\n@scope [(<scope-start>)]? [to (<scope-end>)]? {\n  <rule-list>\n}",
+	"codes": [{
+		"lang": "html",
+		"code": "<div class=\"foo\">\n  <div class=\"green\">这里是绿色</div>\n</div>\n\n<div class=\"green\">不是绿色，因为没在 .foo 里面</div>\n\n<style>\n  @scope (.foo) {\n      .green { background-color: green; }\n    }\n</style>",
+		"title": "例一\n在这个例子中，.green 的样式只会作用在 .foo 里面，不会影响到外面的 .green。 使用的语法是 @scope (.foo)。"
+	}, {
+		"lang": "html",
+		"code": "<div class=\"foo\">\n  <div class=\"green\">这里是绿色</div>\n  <div class=\"limit\">\n    <div class=\"green\">不是绿色，在 .foo 里面，但是在 .limit 下面</div>\n  </div>\n</div>\n\n<div class=\"green\">不是绿色，因为没在 .foo 里面</div>\n<style>\n  @scope (.foo) to (.limit) {\n    .green { background-color: green; }\n  }\n</style>",
+		"title": "例二\n这个例子中使用了完整的 @scope (<scope-start>) to (<scope-end>) 语法，.green 的样式只会作用在 .foo 里面，但是不会作用在 .limit 里面。"
+	}, {
+		"lang": "html",
+		"code": "<div>\n  <style>\n    @scope {\n      .green { background-color: green; }\n    }\n  </style>\n  <div class=\"green\">绿色</div>\n</div>\n\n<div class=\"green\">不是绿色</div>",
+		"title": "例三\n这个例子中，style 标签写在 HTML 结构中，只写了 @scope，省略了 <scope-start>，它就会自动以style的父元素的位置控制作用域。"
+	}],
+	"createTime": 1743260871819,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "68066e2978cad38bfc4afcda",
+	"title": "Fresh 快速入门",
+	"category": "#preact",
+	"content": "前段时间因为 Islands Architecture 的原因，了解了一下 Fresh，整体感觉还是不错的，设计思路很棒，简洁而高效。虽然还有部分功能缺失，目前也很难在企业级应用开发中使用，但是了解其基本功能和架构设计，对我们开阔思路、突破桎梏还是大有裨益的。所以，这里梳理一份快速入门的文档，分享给大家，希望多少能有些帮助。",
+	"codes": [{
+		"lang": "html",
+		"code": "",
+		"title": "起步\n首先我们把环境准备好，项目跑起来。本文基于以下版本：\n\nDeno：1.25.2\nFresh：1.1.0\n安装 Deno\n#\n第一步是安装 Deno，在 macOS 和 Linux 上：\n\ncurl -fsSL https://deno.land/x/install/install.sh | sh\n在 windows 上我建议是使用 wsl，之后全部按照 Linux 操作即可。如果想直接安装，可以参考官方文档，里面有更多的安装方式和升级指南等。\n\n目前 Deno 和 Fresh 还处在密集开发阶段，我在自己玩的过程中，就遇到过版本问题而需要升级的情况。"
+	}, {
+		"lang": "html",
+		"code": "deno run -A -r https://fresh.deno.dev my-project\ncd my-project\ndeno task start",
+		"title": "创建并启动项目 \n接下来创建项目，Fresh 的官方文档是这么教大家建项目的："
+	}, {
+		"lang": "html",
+		"code": "git clone https://github.com/denoland/fresh.git --branch main --depth 10",
+		"title": "创建并启动项目方法二\n我不建议用这个脚手架，因为项目过于简单了，也不方便调试和学习。我们比较建议直接 clone 官方仓库，既包含 Fresh 源码，也有官方的文档站点："
+	}, {
+		"lang": "html",
+		"code": ".\n├── README.md\n├── components/\n├── data/\n├── deno.json\n├── dev.ts\n├── fresh.gen.ts\n├── import_map.json\n├── islands/\n├── main.ts\n├── routes/\n├── static/\n├── twind.config.ts\n└── utils/",
+		"title": "目录结构\n因为我们是直接 clone Fresh 源码的。要看 Fresh 项目的目录结构，只看 www 目录即可\n这里面有几个主要的文件（夹）需要关注一下：\n\ndev.ts：开发入口。本地开发就是启动这个文件。\nmain.ts：线上环境运行的入口。\nfresh.gen.ts：清单文件，包含 routes 和 islands，Fresh 自动生成的。\nroutes/：所有 route 都要在这个目录下，这是约定，后面细说。\nislands/：所有 island 都要在这个目录下，这是约定，后面细说。\nstatic/：存放静态文件，例如 favicon.ico 等。"
+	}, {
+		"lang": "html",
+		"code": "",
+		"title": "Routes\n路由（Route）在 Fresh 里是一个很重要的概念，渲染页面、API 响应、数据请求等都是路由的延伸。\n匹配规则\n#\n所有的路由必须放在 routes 目录下，类似 Next.js 的 File-system routing，或者叫做 “约定式路由” 也行。看几个例子就一目了然了：\n\n路由文件地址\t对应的 pathname\nroutes/index.tsx\t/\nroutes/about.tsx\t/about\nroutes/about/contact.tsx\t/about/contact"
+	}],
+	"createTime": 1745251881535,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6808f98136fff6300214eb0e",
+	"title": "使用React的dangerouslySetInnerHTML属性安全渲染HTML代码技巧解析",
+	"category": "#react,#preact",
+	"content": "原文地址：https://www.oryoy.com/news/shi-yong-react-de-dangerouslysetinnerhtml-shu-xing-an-quan-xuan-ran-html-dai-ma-ji-qiao-jie-xi.html\n\n在React开发中，我们经常需要将HTML内容渲染到组件中。通常情况下，React会自动转义所有渲染的HTML，以防止跨站脚本攻击（XSS）。然而，有时候我们确实需要插入原始的HTML内容，这时dangerouslySetInnerHTML属性就派上用场了。本文将深入探讨如何安全地使用dangerouslySetInnerHTML属性，并提供一些实用的技巧。",
+	"codes": [{
+		"lang": "html",
+		"code": "<div dangerouslySetInnerHTML={{ __html: '<strong>Hello, World!</strong>' }} />",
+		"title": "dangerouslySetInnerHTML是什么？\ndangerouslySetInnerHTML是React提供的一个特殊属性，允许我们直接将HTML字符串插入到组件中。它的用法如下：\n\n这里的__html是一个特殊的键，用于告诉React我们插入的是安全的HTML内容。"
+	}, {
+		"lang": "html",
+		"code": "",
+		"title": "为什么需要谨慎使用？\n虽然dangerouslySetInnerHTML提供了灵活性，但它也带来了安全风险。如果插入的HTML内容包含恶意脚本，可能会导致XSS攻击。因此，在使用这个属性时，必须确保HTML内容是安全的。"
+	}, {
+		"lang": "javascript",
+		"code": "\nimport {render,h} from 'preact'\nimport {html} from 'htm/preact'\n\nconst a='<h1>title</h1>'\nconst App= ()=>{\n\treturn html`\n\t\t<div>\n\t\t\t<div dangerouslySetInnerHTML=${{__html:a}}></div>\n\t\t</div>\n\t`\n}\nrender(h(App),document.body)",
+		"title": "在preact中也有相同的用法\n"
+	}, {
+		"lang": "html",
+		"code": "",
+		"title": "在Vue中使用v-html\n在vue中的jsx模式下也可以使用v-html属性"
+	}],
+	"createTime": 1745418602290,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "680cecc3e46ff36aedd857be",
+	"title": "React Signals ",
+	"category": "",
+	"content": "网页原文：https://www.npmjs.com/package/@preact/signals-react\n\nSignals 是一个高性能状态管理库，有两个主要目标：\n\n尽可能轻松地为小型到复杂的应用程序编写业务逻辑。无论您的逻辑多么复杂，您的应用程序更新都应该保持快速，而无需您考虑它。Signals 会在后台自动优化状态更新，以触发所需的最少更新。默认情况下，它们很懒惰，会自动跳过没人监听的信号。\n集成到框架中，就像它们是原生内置基元一样。您不需要任何选择器、包装器函数或其他任何东西。可以直接访问 Signals，当 Signal 的值发生变化时，你的组件会自动重新渲染。",
+	"codes": [{
+		"lang": "html",
+		"code": "\nnpm install @preact/signals-react\n",
+		"title": "安装：\nGuide / API\nsignal(initialValue)\nsignal.peek()\ncomputed(fn)\neffect(fn)\nbatch(fn)\nuntracked(fn)\nReact Integration\nHooks\nLicense"
+	}, {
+		"lang": "html",
+		"code": "npm i --save-dev @preact/signals-react-transform",
+		"title": "React 集成\n1.Babel Transform\n2.useSignals Hook"
+	}, {
+		"lang": "javascript",
+		"code": "{\n\t\"plugins\": [[\"module:@preact/signals-react-transform\"]]\n}",
+		"title": "Babel 变换\nInstall the Babel transform package () and add the following to your Babel config:\nnpm i --save-dev @preact/signals-react-transform\n\n安装 Babel 转换包 （） 并将以下内容添加到您的 Babel 配置中：\nnpm i --save-dev @preact/signals-react-transform\n\n"
+	}, {
+		"lang": "javascript",
+		"code": "import { useSignals } from \"@preact/signals-react/runtime\";\n\nconst count = signal(0);\n\nfunction CounterValue() {\n\tuseSignals();\n\treturn <p>Value: {count.value}</p>;\n}",
+		"title": "useSignals hook\nIf you can't use the Babel transform, you can directly call the hook to make your components reactive.useSignals\n\n如果你不能使用 Babel 转换，你可以直接调用 hook 来让你的组件反应式。useSignals"
+	}, {
+		"lang": "javascript",
+		"code": "import { useSignal, useComputed, useSignalEffect } from \"@preact/signals-react\";\n\nfunction Counter() {\n\tconst count = useSignal(0);\n\tconst double = useComputed(() => count.value * 2);\n\n\tuseSignalEffect(() => {\n\t\tconsole.log(`Value: ${count.value}, value x 2 = ${double.value}`);\n\t});\n\n\treturn (\n\t\t<button onClick={() => count.value++}>\n\t\t\tValue: {count.value}, value x 2 = {double.value}\n\t\t</button>\n\t);\n}",
+		"title": "Hooks\nIf you need to instantiate new signals or create new side effects on signal changes inside your components, you can use the useSignal, useComputed and useSignalEffect hooks.\n\n如果你需要实例化新信号或对组件内部的信号变化产生新的副作用，你可以使用 和 钩子。useSignaluseComputeduseSignalEffect"
+	}, {
+		"lang": "html",
+		"code": "",
+		"title": "Using signals with React's SSR APIs\nComponents rendered using SSR APIs (e.g. renderToString) in a server environment (i.e. an environment without a global window object) will not track signals used during render. Components generally don't rerender when using SSR APIs so tracking signal usage is useless since changing these signals can't trigger a rerender.\n\n在服务器环境（即没有全局对象的环境）中使用 SSR API（例如 ）渲染的组件将不会跟踪渲染期间使用的信号。组件在使用 SSR API 时通常不会重新渲染，因此跟踪信号使用情况毫无用处，因为更改这些信号不会触发重新渲染。renderToStringwindow"
+	}, {
+		"lang": "javascript",
+		"code": "import { signal } from \"@preact/signals-react\";\n\nconst count = signal(0);\n\n// Unoptimized: Will trigger the surrounding\n// component to re-render\nfunction Counter() {\n\treturn <p>Value: {count.value}</p>;\n}\n\n// Optimized: Will update the text node directly\nfunction Counter() {\n\treturn (\n\t\t<p>\n\t\t\t<>Value: {count}</>\n\t\t</p>\n\t);\n}",
+		"title": "Rendering optimizations\nThe React adapter ships with several optimizations it can apply out of the box to skip virtual-dom rendering entirely. If you pass a signal directly into JSX, it will bind directly to the DOM Text node that is created and update that whenever the signal changes.\n\nReact 适配器附带了几个优化，它可以开箱即用地应用以完全跳过 virtual-dom 渲染。如果你将信号直接传递到 JSX 中，它将直接绑定到创建的 DOM 节点，并在信号发生变化时更新该节点。Text\n要选择此优化，只需直接传递 signal 而不是访问属性。.value"
+	}, {
+		"lang": "javascript",
+		"code": "const count = signal(0);\n\nfunction ShowCount({ getCount }) {\n\treturn <div>{getCount()}</div>;\n}\n\nfunction App() {\n\treturn <ShowCount getCount={() => count.value} />;\n}",
+		"title": "局限性\n此版本的 React 集成不支持将信号作为 DOM 属性传递。以后可能会添加对此的支持。\n\n不建议在 render props 中使用 signals。在这种情况下，读取信号的组件是调用 render 属性的组件，该属性可能会也可能不会挂接到 track 信号。例如："
+	}, {
+		"lang": "javascript",
+		"code": "onst count = signal(0);\n\nfunction ShowCount({ getCount }) {\n\treturn <div>{getCount()}</div>;\n}\n\nconst Count = () => <>{count.value}</>;\n\nfunction App() {\n\treturn <ShowCount getCount={() => <Count />} />;\n}",
+		"title": "\n在这里，该组件是在运行时访问的组件，因为它调用 ，因此需要将其挂接以跟踪信号。但是，由于它不会静态访问信号，因此 Babel 变换默认情况下不会对其进行转换。一种解决方法是在 Babel 插件的 config 中设置，这将转换所有组件。另一种解决方法是将 render prop 的返回放入它自己的组件中，然后从你的 render prop 返回它。在下面的示例中，组件静态访问 signal，因此默认情况下将对其进行转换。ShowCountcount.valuegetCountmode: allCount"
+	}],
+	"createTime": 1745677506409,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6816175f35efa9e5fa393d41",
+	"title": "react-css-modules的使用",
+	"category": "#react,#preact",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "npm install react-css-modules --save",
+		"title": "安装\n"
+	}, {
+		"lang": "javascript",
+		"code": "import style from \"./test.module.css\";\nimport CssModules from \"react-css-modules\";\n\nfunction Page() {\n  return (\n    <div styleName='main-container'>\n      <h1 styleName=\"h1\">react-css-modules的使用</h1>\n      <div styleName=\"container\">\n        <h2 styleName=\"h2\">1.安装</h2>\n        <pre  styleName=\"pre\">\n\n        <code styleName=\"code\">npm install react-css-modules --save</code>\n        </pre>\n        \n      </div>\n    </div>\n  );\n}\n\nexport default CssModules(style)(Page);\n",
+		"title": "使用\n1.在css文件中使用的类名必须和jsx文件中使用的类名一致，否则会报错。\n2.在jsx文件中使用styleName属性，属性值为css文件中使用的类名。"
+	}, {
+		"lang": "javascript",
+		"code": "\n.main-container{\n  width: 100%;\n  height: 100vh;\n background-color: aliceblue; \n\n}\n.base{\n background-color: aliceblue; \n width: 100%;\n}\n.h1{\n  color:rgb(245, 240, 240);\n  background-color: rgb(35, 52, 68);\n  text-align: center;\n  padding: 20px;\n}\n.container {\n  composes: base;\n}\n.h2{\n  margin:5px;\n}\n.code{\n  color:rgb(245, 240, 240);\n  background-color: rgb(35, 52, 68);\n  font-size: 15px;\n  width: 100%;\n}\n\n.pre{\n  color:rgb(245, 240, 240);\n  background-color: rgb(35, 52, 68);\n  font-size: 15px;\n}",
+		"title": "test.module.css\n"
+	}, {
+		"lang": "javascript",
+		"code": "import { defineConfig } from 'vite'\nimport { resolve } from 'path';\n\n\n \nexport default defineConfig({\n\tesbuild: {\n    jsxInject: \"import { h } from 'preact'\",\n\t  jsxFactory: \"h\",\n\t  jsxFragment: \"h.f\"\n\t},\n    \n  \n  \n\n\tresolve: {\n\t   alias: {\n\t     'react': 'preact/compat', \n\t     'react-dom':'preact/compat', \n\t\t\t 'my':'/src/zxm/utils/mylib.js',\n       'com': '/src/zxm/com',\n       'utils': '/src/zxm/utils',\n\t     // 你可以根据需要设置更多别名\n\t   },\n\t },\n});",
+		"title": "在preact中也可以使用\n配置vite.confing.mjs"
+	}],
+	"createTime": 1746278240073,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6819d65d4ec17a14682bd2eb",
+	"title": "@preact/preset-vite",
+	"category": "#preact",
+	"content": "@preact/preset-vite 是一个为使用 Preact 框架与 Vite 打包工具搭配开发的预设工具，旨在帮助开发者快速搭建高性能的 Preact 应用。以下是关于它的功能、项目中的作用以及使用方法的详细介绍：\n\njsx文件中不用导入h函数",
+	"codes": [{
+		"lang": "html",
+		"code": "",
+		"title": "功能\n热模块替换（HMR）：通过集成 prefresh，@preact/preset-vite 提供了热模块替换功能，开发者在修改代码后无需手动刷新页面即可看到更新。\nPreact Devtools 集成：在开发模式下自动启用 Preact Devtools，方便开发者调试组件结构和状态。\nReact 兼容性：自动将 react 和 react-dom 别名映射到 preact/compat，确保与 React 生态系统的兼容性。\n预渲染支持：允许开发者通过配置启用预渲染功能，从而提高应用的 SEO 性能。"
+	}, {
+		"lang": "html",
+		"code": "",
+		"title": "在项目中的作用\n简化配置：通过预设，开发者可以避免繁琐的配置过程，快速启动项目。\n性能优化：结合 Preact 的轻量级特性和 Vite 的高效构建能力，为用户提供更快的加载时间和交互体验。\n开发效率提升：热模块替换和 Devtools 集成使得开发过程更加高效。\nSEO 优化：通过预渲染功能，应用在生产环境中可以生成静态 HTML，提升搜索引擎的抓取效果。"
+	}, {
+		"lang": "html",
+		"code": "mkdir my-preact-project\ncd my-preact-project\nnpm init -y",
+		"title": "创建一个新的项目目录并初始化 npm 或 yarn 项目：\n"
+	}, {
+		"lang": "html",
+		"code": "npm install --save-dev @preact/preset-vite\n# 或者使用 yarn\nyarn add -D @preact/preset-vite",
+		"title": "安装 @preact/preset-vite\n"
+	}, {
+		"lang": "javascript",
+		"code": "import { defineConfig } from \"vite\";\nimport preact from \"@preact/preset-vite\";\n\nexport default defineConfig({\n  plugins: [preact()]\n});",
+		"title": "配置\n"
+	}, {
+		"lang": "javascript",
+		"code": "import { defineConfig } from \"vite\";\nimport preact from \"@preact/preset-vite\";\n\nexport default defineConfig({\n  plugins: [\n    preact({\n      prerender: {\n        enabled: true,\n        renderTarget: \"#app\",\n        prerenderScript: \"/path/to/prerender.js\",\n        additionalPrerenderRoutes: [\"/404\"],\n        previewMiddlewareEnabled: true,\n        previewMiddlewareFallback: \"/404.html\"\n      }\n    })\n  ]\n});",
+		"title": "如果需要进一步自定义配置，可以通过传递选项对象到 preact() 中，例如启用预渲染\n"
+	}, {
+		"lang": "javascript",
+		"code": "// src/index.jsx\nimport { hydrate, prerender as ssr } from 'preact-iso';\n\nfunction App() {\n  return <h1>Hello, Preact!</h1>;\n}\n\nif (typeof window !== 'undefined') {\n  hydrate(<App />, document.getElementById('app'));\n}\n\nexport async function prerender(data) {\n  return await ssr(<App {...data} />);\n}",
+		"title": "示例代码\n"
+	}, {
+		"lang": "html",
+		"code": "",
+		"title": "\n通过以上步骤和配置，开发者可以快速搭建一个基于 Preact 和 Vite 的高性能应用。@preact/preset-vite 提供的热模块替换、Devtools 集成以及预渲染功能，使得开发过程更加高效和便捷"
+	}],
+	"createTime": 1746523743901,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "681a0fdf4ec17a146830e1b5",
+	"title": "@preact/preset-vite使用babel",
+	"category": "#preact",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "//vite.config.js中使用babel\nimport { defineConfig } from \"vite\";\nimport preact from \"@preact/preset-vite\";\n\n// https://vite.dev/config/\nexport default defineConfig({\n  plugins: [\n    preact( {\n      babel:{\n        plugins: [\n          [\n            \"htm\",\n            {\n              pragma: \"h\",\n            },\n          ],\n        ],\n      },\n    }),\n  ],\n});\n",
+		"title": "vite.config.js中使用babel\n"
+	}],
+	"createTime": 1746538463808,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "681f6e8277804949e5451106",
+	"title": "CSS Module中composes使用",
+	"category": "#css",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "// a.module.css\n.text{\n  font-size:30px;\n}\n.text-selected{\n  composes:selected from global;\n  composes:text;\n  color:white;\n}",
+		"title": "引用全局类\n.selected{\n  background-color:'blue';\n}"
+	}],
+	"createTime": 1746890369222,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6839099f33ac316e16bae8a7",
+	"title": "理解 styled-jsx 的 :global()",
+	"category": "#react,#preact",
+	"content": "网页地址：https://kejiweixun.com/note/202210280932\n\n",
+	"codes": [{
+		"lang": "javascript",
+		"code": "import Link from 'next/link'\nexport default () => (\n  <div>\n    <Link href=\"/about\" className=\"link\">关于</p>\n    <style jsx>{`\n      div :global(.link) {\n        color: red;\n      }\n    `}</style>\n  </div>\n);",
+		"title": "\nstyled-jsx 的文档对 :global() 的表述容易让人迷惑，我提交了一个文档 PR，顺便在这里记录我对 :global() 的理解。\n\nstyled-jsx 是 next.js 官方维护的 css-in-js 方案，它会把这段代码：\n\nexport default () => (\n  <div>\n    <p>only this paragraph will get the style.</p>\n    <style jsx>{`\n      p {\n        color: red;\n      }\n    `}</style>\n  </div>\n);\n自动 transpile 为：\n\nimport _JSXStyle from \"styled-jsx/style\";\nexport default () => (\n  <div className=\"jsx-123\">\n    <p className=\"jsx-123\">only this paragraph will get the style.</p>\n    <_JSXStyle id=\"123\">{`p.jsx-123 {color: red;}`}</_JSXStyle>\n  </div>\n);\nstyled-jsx 默认只作用于当前的 component，对其他 component 无效。上面的例子中，如果在 <p> 后加入一个自定义组件，例如 <MyComponent>，假设这个 <MyComponent> 也有 <p>，那本组件的 p { color: red; } 并不会对 <MyComponent> 的 <p> 起作用。\n\n为什么呢？因为 styled-jsx 会自动给本组件的每个 html 标签增加一个仅属于本组件的 className。\n\n仔细看上面被 transpile 后的结果，所有 div、p 的 class 属性都自动增加了 jsx-123，这个 className 在本组件内是相同的，但在不同组件间是唯一的。再看 <_JSXStyle> 中的 css 选择器，我们本来写的选择器仅仅是 p，但 styled-jsx 会把它改成 p.jsx-123，这就导致了 color: red 这段 css 命令只能作用于本组件。\n\n这种在 selector 中自动添加 jsx-123 的做法，叫 selectors scoping。所以用 styled-jsx 写的样式，是自动 scope 在本组件的，无需担心它会对其他组件的样式产生干扰。\n\n现在问题来了，有时候我们就希望在本组件中对 import 进来的组件进行样式设置啊。例如 Next.js 13 的 next/link 组件不支持增加 <a> 标签作为它的内部元素了，之前我们可以在 <a> 添加 className 然后添加样式，现在 <a> 没有了，那怎么继续使用 className 对 next/link 进行样式设置呢？\n\n这时候可以用 :global()，:global() 经常用于取消前面提到的 selectors scoping。还是前面的例子，用了 :global() 后，p.jsx-123 就会变成 p，于是 {color: red;} 就会作用于所有 <p> 标签，注意，所有是指：包括父组件、子组件、相邻组件在内的所有 <p>。\n\n:global() 的最佳实践是仅取消 selectors scoping，而不是取消所有 scoping，即不希望它成为全局样式（全局样式有更好的写法，后文有叙），取消 selectors scoping 是希望它既可以作用于本组件，也可以作用于子组件，并不希望它影响父组件或者相邻的其他组件，所以通常我们会这样使用 :global()：\n\nimport Link from 'next/link'\nexport default () => (\n  <div>\n    <Link href=\"/about\">关于</p>\n    <style jsx>{`\n      div :global(a) {\n        color: red;\n      }\n    `}</style>\n  </div>\n);\n或：\n\nimport Link from 'next/link'\nexport default () => (\n  <div>\n    <Link href=\"/about\" className=\"link\">关于</p>\n    <style jsx>{`\n      div :global(.link) {\n        color: red;\n      }\n    `}</style>\n  </div>\n);\n在 :global() 前添加本组件的任意一个 css 选择器，这里添加了 div 标签选择器，div 选择器因为没有使用 :global()，所以它还是 selectors scoping 的，所以 styled-jsx 最后会把它理解为 div.jsx-123 a 或 div.jsx-123 .link，所以 a 或 .link 只会作用于本组件及其子组件。\n\n注意 div :global(.link) 会作用于本组件及所有子组件，即子组件的子组件的 .link，如果仅希望作用于本组件及仅下一级的子组件，可以这样：div > :global(.link)。"
+	}, {
+		"lang": "javascript",
+		"code": "export default () => (\n  <div>\n    <style jsx global>{`\n      body {\n        background: red;\n      }\n    `}</style>\n  </div>\n);",
+		"title": "\n虽然 :global() 可以让括号内的选择器变成全局组件，但这样全局和局部样式就混在一起了，不利于后续维护。如果想使用 styled-jsx 写全局样式，建议在 <style jsx> 添加 global，把所有全局样式单独写在一起："
+	}],
+	"createTime": 1748568481520,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "68390b2ff165ca85a81dbf96",
+	"title": "styled-jsx",
+	"category": "#react,#preact",
+	"content": "styled-jsx是一个支持jsx方式编写的css-in-js插件",
+	"codes": [{
+		"lang": "html",
+		"code": "npm install --save styled-jsx",
+		"title": "安装\n用npm安装styled-jsx"
+	}, {
+		"lang": "javascript",
+		"code": "{\n  \"plugins\": [\n    \"styled-jsx/babel\"\n  ]\n}",
+		"title": "在babel的plugins中配置styled-jsx/babe\n"
+	}, {
+		"lang": "javascript",
+		"code": "export default () => (\n  <div>\n    <p>only this paragraph will get the style :)</p>\n    <style jsx>{`\n      p {\n        color: red;\n      }\n    `}</style>\n  </div>\n)\n",
+		"title": "组件内样式\n在<style jsx>中编写你的css代码"
+	}, {
+		"lang": "javascript",
+		"code": "export default () => (\n  <div>\n    <style jsx global>{`\n      body {\n        background: red;\n      }\n    `}</style>\n  </div>\n);",
+		"title": "使用css.global定义全局样式\n"
+	}, {
+		"lang": "javascript",
+		"code": "import Link from 'next/link'\nexport default () => (\n  <div>\n    <Link href=\"/about\">关于</p>\n    <style jsx>{`\n      div :global(a) {\n        color: red;\n      }\n    `}</style>\n  </div>\n);",
+		"title": "styled-jsx 的 :global()\n可以用 :global()，:global() 经常用于取消前面提到的 selectors scoping。还是前面的例子，用了 :global() 后，p.jsx-123 就会变成 p，于是 {color: red;} 就会作用于所有 <p> 标签，注意，所有是指：包括父组件、子组件、相邻组件在内的所有 <p>。\n\n:global() 的最佳实践是仅取消 selectors scoping，而不是取消所有 scoping，即不希望它成为全局样式（全局样式有更好的写法，后文有叙），取消 selectors scoping 是希望它既可以作用于本组件，也可以作用于子组件，并不希望它影响父组件或者相邻的其他组件，所以通常我们会这样使用 :global()："
+	}],
+	"createTime": 1748568880577,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "691688f0b90519b461343df3",
+	"title": "在script setup中使用渲染函数",
+	"category": "#vue",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "\n<script lang=\"jsx\" setup>\nimport { getCurrentInstance} from 'vue';\n\nconst render = () => {\n\treturn (\n\t\t<div>\n\t\t\t<div>\n\t\t\t\t<div>\n\t\t\t\t\t<div class='test'>hello</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\t);\n};\ngetCurrentInstance().render = render;\n</script>\n<style scoped>\n.test {\n\tcolor: red;\n\tfont-size: 40px;\n}\n</style>",
+		"title": "\n"
+	}],
+	"createTime": 1763084529061,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "691887e714caa75d7247e1d9",
+	"title": "css-in-js",
+	"category": "",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "\n/*  version = v2.4 */\n\nimport { h ,cloneElement} from 'preact'\n\nfunction generateUniqueString() {\n\tconst randomNum = Math.floor(Math.random() * 10000);\n\tconst randomNum2 = Math.floor(Math.random() * 10000);\n\treturn 'css_' + randomNum.toString(36) + randomNum2.toString(36);\n}\n\nfunction addStyleToDocument(css) {\n\tconst _id = 'style_preact'\n\tlet style = document.getElementById(_id) || createStyle(_id)\n\tstyle.appendChild(document.createTextNode(css));\n}\n\nfunction createStyle(_id) {\n\tvar style = document.createElement('style');\n\tstyle.type = 'text/css';\n\tstyle.id = _id\n\tdocument.head.appendChild(style);\n\treturn style\n}\n\nfunction addClass(children, attr) {\n\tif ((typeof children !== 'object')||(children===null)) return children\n\tif (Array.isArray(children)) {\n\t\treturn children.map(child => addClass(child, attr))\n\t}\n\tif (typeof children === 'object') {\n\t\tif (typeof children.props.children=='object' && children.props.children!==null) {\n\t\t\tchildren.props.children = addClass(children.props.children, attr)\n\t\t} \n\t\treturn cloneElement(children, { [attr]: '' })\n\t}\n}\n\nfunction styled(arr, ...value) {\n\tlet str = arr[0]\n\tfor (let i = 0; i < value.length; i++) {\n\t\tstr += value[i] + arr[i + 1]\n\t}\n\tlet cssKey = generateUniqueString()\n\tlet newCss = str.replace(/[ |\t|\n|\n]*{/g, v=>'&'+v).replace(/[&]+/g,'['+cssKey+']')\n\taddStyleToDocument(newCss)\n\treturn ({ children }) => h('div', { [cssKey]:'' }, addClass(children,cssKey))\n}\n\nstyled.createGlobal=function(arr, ...value){\n\tlet str = arr[0]\n\tfor (let i = 0; i < value.length; i++) {\n\t\tstr += value[i] + arr[i + 1]\n\t}\n\taddStyleToDocument(str)\n}\n\nexport { styled, styled as default }\t\t\n\t\t",
+		"title": "styled.js\n"
+	}, {
+		"lang": "javascript",
+		"code": "\n\n\t\t\t\n\t\t\timport { render,h } from 'preact';\n      \t\t\timport { html } from 'htm/preact';\n\t\t\timport {signal} from '@preact/signals';\n\t\t\timport styled from 'utils/css-module/styled.js';\n\t\t\t\n\t\t\t/* & 为test自身样式 其他样式前面加&和不加&效果一样*/\n\t\t\tconst Test=styled`\n\t\t\t\t&{\n\t\t\t\t\tcolor:blue;\n\t\t\t\t\tfont-color:20px;\n\t\t\t\t}\n\t\t\t\t.h1{\n\t\t\t\t\ttext-align:center;\n\t\t\t\t\tcolor:red;\n\t\t\t\t\tfont-size:40px;\n\t\t\t\t\tmargin:20px;\n\t\t\t\t}\n\t\t\t`\n\t\t\t\n\t\t\tfunction App(){\n\t\t\t\treturn html`\n\t\t\t\t\t<${Test}>\n\t\t\t\t\t\t<div className='h1'>标题</div>\n\t\t\t\t\t\t正文\n\t\t\t\t\t<//>\n\t\t\t\t`\n\t\t\t}\n\t\t\trender(h(App),document.body)\n\t\t\n\t\t\n\t\t",
+		"title": "test.js\n"
+	}, {
+		"lang": "html",
+		"code": "在vscode 中安装 vscode-styled-components插件，可以支持语法高亮显示和语法提示。",
+		"title": "安装 vscode-styled-components插件\n"
+	}],
+	"createTime": 1763215338232,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6923a9369f151a19a656fc02",
+	"title": "自定义的cssModule函数",
+	"category": "#js,#css",
+	"content": "模拟导入style.module.css文件的效果",
+	"codes": [{
+		"lang": "javascript",
+		"code": "/**\n * 零依赖 CSS Module 函数：支持多类名、哈希隔离、样式去重、动态变量\n * @param {TemplateStringsArray} template - CSS 模板字符串\n * @param  {...any} values - 动态变量（可选）\n * @returns {Object|null} 原始类名 → 哈希类名映射，错误时返回 null\n */\nfunction cssModule(template, ...values) {\n  // 存储已注入的 CSS 哈希，用于去重\n  const injectedHashes = new Set();\n\n  try {\n    // 1. 拼接模板字符串（支持动态变量插值）\n    const cssContent = template.reduce((acc, part, idx) => {\n      return acc + part + (values[idx] || '');\n    }, '');\n\n    // 2. 生成 CSS 内容哈希（用于去重，基于 CRC32 简化算法）\n    const contentHash = generateHash(cssContent).slice(0, 8);\n    if (injectedHashes.has(contentHash)) {\n      console.warn(`⚠️ CSS 已存在（哈希：${contentHash}），跳过重复注入`);\n      return null;\n    }\n\n    // 3. 提取原始类名（匹配 .className{...} 格式，排除伪类/媒体查询）\n    const classReg = /\\.([a-zA-Z0-9_-]+)(?=\\s*\\{)/g;\n    const classNames = new Set();\n    let match;\n    while ((match = classReg.exec(cssContent)) !== null) {\n      classNames.add(match[1]);\n    }\n    const classList = Array.from(classNames);\n    if (classList.length === 0) {\n      throw new Error('❌ 未提取到有效类名，请检查 CSS 格式（如 .className{...}）');\n    }\n\n    // 4. 生成原始类名 → 哈希类名映射（基于类名+内容哈希，确保唯一性）\n    const classMap = {};\n    classList.forEach(name => {\n      const uniqueStr = `${name}-${contentHash}`;\n      classMap[name] = `css-${generateHash(uniqueStr).slice(0, 6)}`;\n    });\n\n    // 5. 替换原始类名为哈希类名，生成最终 CSS\n    const processedCss = cssContent.replace(\n      /\\.([a-zA-Z0-9_-]+)(?=\\s*\\{)/g,\n      (_, name) => `.${classMap[name] || _}`\n    );\n\n    // 6. 注入 CSS 到页面（创建 style 标签，添加去重标识）\n    injectCss(processedCss, contentHash);\n    injectedHashes.add(contentHash);\n\n    return classMap;\n  } catch (error) {\n    console.error('cssModule 执行失败：', error.message);\n    return null;\n  }\n\n  /**\n   * 辅助函数：生成字符串哈希（简化 CRC32 算法，确保唯一性）\n   * @param {string} str - 输入字符串\n   * @returns {string} 16 进制哈希值\n   */\n  function generateHash(str) {\n    let hash = 0;\n    for (let i = 0; i < str.length; i++) {\n      hash = ((hash << 5) - hash) + str.charCodeAt(i);\n      hash |= 0; // 转为 32 位整数\n    }\n    return (hash >>> 0).toString(16); // 转为无符号 16 进制\n  }\n\n  /**\n   * 辅助函数：注入 CSS 到页面 head\n   * @param {string} css - 处理后的 CSS 内容\n   * @param {string} hash - CSS 内容哈希（用于标识）\n   */\n  function injectCss(css, hash) {\n    const styleElement = document.createElement('style');\n    styleElement.type = 'text/css';\n    styleElement.textContent = css;\n    styleElement.setAttribute('data-css-module', hash); // 添加唯一标识\n    document.head.appendChild(styleElement);\n  }\n}\nexport default cssModule;",
+		"title": "源码\n"
+	}, {
+		"lang": "javascript",
+		"code": "import cssModule from 'utils/css-module/css-module.js'\n\n// 1. 基础使用（多类名）\nconst styles1 = cssModule`\n      .container {\n        width: 100%;\n        padding: 20px;\n        background: #f5f5f5;\n        border-radius: 8px;\n      }\n      .title {\n        font-size: 24px;\n        color: #333;\n        font-weight: bold;\n      }\n    `;\n\n// 2. 动态变量示例（传递颜色参数）\nconst primaryColor = '#007bff';\nconst styles2 = cssModule`\n      .btn {\n        padding: 8px 16px;\n        background: ${primaryColor};\n        color: white;\n        border: none;\n        border-radius: 4px;\n        &:hover { background: #0056b3; }\n      }\n      .desc {\n        color: #666;\n        margin: 10px 0;\n      }\n    `;\n\n// 3. 页面渲染\nif (styles1 && styles2) {\n\tlet div=document.createElement('div');\n\tdiv.id='app';\n\tdocument.body.appendChild(div);\n\tdiv.innerHTML = `\n        <div class=\"${styles1.container}\">\n          <h1 class=\"${styles1.title}\">零依赖 CSS Module 测试</h1>\n          <p class=\"${styles2.desc}\">这是动态样式演示</p>\n          <button class=\"${styles2.btn}\">点击按钮</button>\n        </div>\n      `;\n}",
+		"title": "示例\n"
+	}],
+	"createTime": 1763944759046,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "692865bb9f151a19a68a0e88",
+	"title": "preact-router",
+	"category": "#js,#preact",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "import { h, render } from 'preact'\nimport { html } from 'htm/preact'\nimport { Router, Link } from 'preact-router'\nimport { createHashHistory } from 'history'\nconst history = createHashHistory()\n\nfunction Home() {\n\treturn html`\n\t\t<div>\n\t\t\t<h1>Home</h1>\n\t\t</div>\n\t`\n}\n\nfunction About() {\n\treturn html`\n\t\t<div>\n\t\t\t<h1>About</h1>\n\t\t</div>\n\t\t`\n}\n\nfunction App() {\n\treturn html`\n\t\t<div>\n\t\t\t<nav>\n\t\t\t\t<${Link} href=\"/\">Home<//> ${' |  '}\n\t\t\t\t<${Link} href=\"/about\">About<//>\n\t\t\t</nav>\n\t\t</div>\n\t\t<${Router} history=${history}>\n\t\t\t<${Home} path=\"/\" />\n\t\t\t<${About} path=\"/about\" />\n\t\t<//>\n\t`\n}\nrender(h(App), document.body)",
+		"title": "\n"
+	}],
+	"createTime": 1764255163021,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "692b9441b90519b46111f1f2",
+	"title": "importmap的使用",
+	"category": "",
+	"content": "",
+	"codes": [{
+		"lang": "html",
+		"code": "<script type=\"importmap\">\n\t{\n\t\t\"imports\": {\n\t\t\t\"preact\": \"https://esm.sh/preact@10.23.1\",\n\t\t\t\"preact/\": \"https://esm.sh/preact@10.23.1/\",\n\t\t\t\"@preact/signals\": \"https://esm.sh/@preact/signals@1.3.0?external=preact\",\n\t\t\t\"htm/preact\": \"https://esm.sh/htm@3.1.1/preact?external=preact\",\n\t\t\t\"preact-router\": \"https://esm.sh/preact-router@4.1.2\",\n\t\t\t\"history\": \"https://esm.sh/history@4.1.0\",\n\t\t\t\"utils/\": \"https://cdn.jsdelivr.net/gh/gh569/lib@main/utils/\"\n\t\t}\n\t}\n</script>",
+		"title": "在文件的head部分添加importmap\n"
+	}, {
+		"lang": "javascript",
+		"code": "\t\t\timport { render } from 'preact';\n      \t\t\timport { html } from 'htm/preact';\n\t\t\timport {signal} from '@preact/signals';\n\t\t\timport styled from 'utils/css-module/styled.js';\n\t\t\t\n\t\t\tconst test=signal('test')\n\t\t\tconst style=styled`\n\t\t\t\th1{\n\t\t\t\t\tcolor:red;\n\t\t\t\t\tfont-size:80px;\n\t\t\t\t}\n\t\t\t\tbutton{\n\t\t\t\t\tfont-size:50px;\n\t\t\t\t\tmargin:20px;\n\t\t\t\t}\n\t\t\t`\n\n      export function App() {\n        return html`<${style}>\n          <h1>${test.value}</h1>\n\t\t\t\t\t<button onClick=${()=>{test.value=(test.value=='test'?'hello':'test')}}>click</button>\n\t\t\t\t\t<//>\n        `;\n      }\n\n      render(html`<${App} />`, document.body);",
+		"title": "演示代码\n"
+	}],
+	"createTime": 1764463680381,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "692ffb4d761cdece33dcfe2d",
+	"title": "动态加载importmap的两种方法",
+	"category": "",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "export default{\n\t\t\t\t\t\"preact\": \"https://esm.sh/preact@10.23.1\",\n\t\t\t\t\t\"preact/\": \"https://esm.sh/preact@10.23.1/\",\n\t\t\t\t\t\"@preact/signals\": \"https://esm.sh/@preact/signals@1.3.0?external=preact\",\n\t\t\t\t\t\"htm/preact\": \"https://esm.sh/htm@3.1.1/preact?external=preact\",\n\t\t\t\t\t\"preact-router\": \"https://esm.sh/preact-router@4.1.2\",\n\t\t\t\t\t\"history\": \"https://esm.sh/history@4.1.0\",\n\t\t\t\t\t\"utils/\": \"https://cdn.jsdelivr.net/gh/gh569/lib@main/utils/\"\n\t\t\t\t}",
+		"title": "外部文件env.js\n"
+	}, {
+		"lang": "html",
+		"code": "<html>\n\t<head>\n\t\t<meta charset=\"UTF-8\" />\n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n\t</head>\n\t<body>\n\t\t<div id='app'></div>\n\t\t<script type='module'>\n\t\t\tconst code = `\n\t\t\t\timport {h,render} from 'preact'\n\t\t\t\tfunction App(){\n\t\t\t\t\treturn h('div',{style:'color:blue;font-size:40px;text-align:center'},'hello')\n\t\t\t\t}\n\t\t\t\tconst appContainer = document.getElementById('app');\n\t\t\t\tappContainer.innerHTML = '';\n\t\t\t\trender(h(App), appContainer);\n\t\t`\n\t\t\tconst importMapConfig = {\n\t\t\t\timports: {\n\t\t\t\t\t\"preact\": \"https://esm.sh/preact@10.23.1\",\n\t\t\t\t\t\"preact/\": \"https://esm.sh/preact@10.23.1/\",\n\t\t\t\t\t\"@preact/signals\": \"https://esm.sh/@preact/signals@1.3.0?external=preact\",\n\t\t\t\t\t\"htm/preact\": \"https://esm.sh/htm@3.1.1/preact?external=preact\",\n\t\t\t\t\t\"preact-router\": \"https://esm.sh/preact-router@4.1.2\",\n\t\t\t\t\t\"history\": \"https://esm.sh/history@4.1.0\",\n\t\t\t\t\t\"utils/\": \"https://cdn.jsdelivr.net/gh/gh569/lib@main/utils/\"\n\t\t\t\t}\n\t\t\t};\n\n\t\t\t// 创建 script 标签（type=\"importmap\"）\n\t\t\tconst importMapScript = document.createElement('script');\n\t\t\timportMapScript.type = 'importmap';\n\n\t\t\t// 将配置对象转为 JSON 字符串（确保无语法错误）\n\t\t\timportMapScript.textContent = JSON.stringify(importMapConfig);\n\n\t\t\t// 插入到 <head> 的最前面（保证优先级最高，在所有依赖脚本之前）\n\t\t\tdocument.head.insertBefore(importMapScript, document.head.firstChild);\n\n\t\t\tconst script = document.createElement('script');\n\t\t\tscript.type = 'module'\n\t\t\tscript.textContent = code;\n\t\t\tdocument.body.appendChild(script);\n\t\t</script>\n\t</body>\n</html>",
+		"title": "用createElement的方式\n为了演示方便，把env.js写到了代码中"
+	}, {
+		"lang": "html",
+		"code": "<html>\n\t<head>\n\t\t<meta charset=\"UTF-8\" />\n\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n\t</head>\n\t<body>\n\t\t<div id='app'></div>\n\t\t<script type='module'>\n\t\t\tconst code = `\n\t\t\t\timport {h,render} from 'preact'\n\t\t\t\tfunction App(){\n\t\t\t\t\treturn h('div',{style:'color:blue;font-size:40px;text-align:center'},'hello')\n\t\t\t\t}\n\t\t\t\tconst appContainer = document.getElementById('app');\n\t\t\t\tappContainer.innerHTML = '';\n\t\t\t\trender(h(App), appContainer);\n\t\t`\n\t\t\tconst importMap = `{\n\t\t\t\t\"imports\": {\n\t\t\t\t\t\"preact\": \"https://esm.sh/preact@10.23.1\",\n\t\t\t\t\t\"preact/\": \"https://esm.sh/preact@10.23.1/\",\n\t\t\t\t\t\"@preact/signals\": \"https://esm.sh/@preact/signals@1.3.0?external=preact\",\n\t\t\t\t\t\"htm/preact\": \"https://esm.sh/htm@3.1.1/preact?external=preact\",\n\t\t\t\t\t\"preact-router\": \"https://esm.sh/preact-router@4.1.2\",\n\t\t\t\t\t\"history\": \"https://esm.sh/history@4.1.0\",\n\t\t\t\t\t\"utils/\": \"https://cdn.jsdelivr.net/gh/gh569/lib@main/utils/\"\n\t\t\t\t}\n\t\t\t}`;\n\n\t\t\tconst html=`\n\t\t\t\t<html>\n\t\t\t\t\t<head>\n\t\t\t\t\t\t<meta charset=\"UTF-8\" />\n\t\t\t\t\t\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n\t\t\t\t\t\t<script type=\"importmap\">\n\t\t\t\t\t\t\t${importMap}\n\t\t\t\t\t\t<${''}/script>\n\t\t\t\t\t</head>\n\t\t\t\t\t<body>\n\t\t\t\t\t\t<div id='app'></div>\n\t\t\t\t\t\t<script type='module'>\n\t\t\t\t\t\t\t${code}\n\t\t\t\t\t\t<${''}/script>\n\t\t\t\t</html>\n\t\t\t`\n\t\t\twindow.onload=function(){\n\t\t\t\tdocument.write(html)\n\t\t\t\tdocument.close()\n\t\t\t}\n\t\t\tconsole.log(html)\n\t\t</script>\n\t</body>\n</html>",
+		"title": "用document.write的方式\n"
+	}],
+	"createTime": 1764752204731,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6933a43f14caa75d726ca9b5",
+	"title": "cssModule和withCssModule搭配使用",
+	"category": "",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "import cssModule from 'utils/css-module/css-module.js'\n\t\t\timport withCssModule from 'utils/css-module/with-css-module.js'\n\t\t\timport { h,render } from 'preact'\n\t\t\timport {html} from 'htm/preact'\n\n\t\t\t// 1. 基础使用（多类名）\n\t\t\tconst styles1 = cssModule`\n      .container {\n        width: 100%;\n        padding: 20px;\n        background: #f5f5f5;\n        border-radius: 8px;\n      }\n      .container-title {\n        font-size: 36px;\n        color: blue;\n\t\t\t\ttext-align: center;\n\t\t\t\tmargin-bottom: 20px;\n        font-weight: bold;\n      }\n\t\t\t.container-text {\n        font-size: 16px;\n        color: green;\n      }\n    `;\n\n\t\t\t\n\n\t\t\t// 3. 页面渲染\n\t\t\tfunction App(){\n\t\t\t\treturn html`\n\t\t\t\t<div className='container'>\n\t\t\t\t\t<h1 className='container-title'>cssModule和withCssModule</h1>\n\t\t\t\t\t<div className='container-text'>这是他们搭配使用的效果</div>\n\t\t\t\t</div>\n      `\n\t\t\t}\n\t\t\trender(h(withCssModule(App,styles1)), document.getElementById('app'))",
+		"title": "示例\n"
+	}],
+	"createTime": 1764992065117,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "6947eae5680a13cada7eed27",
+	"title": "@dr.pogodin/babel-plugin-react-css-modules插件",
+	"category": "#js,#react,#preact,#css",
+	"content": "在使用CssModules的时候，组件里面需要导入page.module.css,然后在样式中写className={styles.name}的形式。如果有“-”，还有写成styles['item-name']的样式，比较麻烦。这个插件就是可以不用写styles",
+	"codes": [{
+		"lang": "html",
+		"code": "npm install @dr.pogodin/babel-plugin-react-css-modules --save-dev",
+		"title": "安装\n"
+	}, {
+		"lang": "javascript",
+		"code": "//vite.config.js\n//示例是在uni项目中，需要先安装@preact/preset-vite\n//需要先编写css-modules.config.js文件\n\nimport {\n\tdefineConfig\n} from \"vite\";\nimport _uni from \"@dcloudio/vite-plugin-uni\";\nimport preact from \"@preact/preset-vite\";\nimport path from \"path\";\nimport cssModulesConfig from \"./css-modules.config\";\n\nconst uni = _uni.default;\n\n// 创建一个包装函数，确保参数传递一致\nconst generateScopedName = (localName, resourcePath) => {\n\treturn cssModulesConfig.generateScopedName(localName, resourcePath);\n};\n\nexport default defineConfig({\n\tplugins: [\n\t\tpreact({\n\t\t\tjsxRuntime: \"automatic\",\n\t\t\tbabel: {\n\t\t\t\tplugins: [\n\t\t\t\t\t[\n\t\t\t\t\t\t\"@dr.pogodin/babel-plugin-react-css-modules\",\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tgenerateScopedName: generateScopedName,\n\t\t\t\t\t\t\thandleMissingStyleName: \"warn\",\n\t\t\t\t\t\t\tattributeNames: {\n\t\t\t\t\t\t\t\tstyleName: \"class\"\n\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\tcontext: __dirname\n\t\t\t\t\t\t}\n\t\t\t\t\t],\n\t\t\t\t],\n\t\t\t},\n\t\t}),\n\t\tuni(),\n\t],\n\tbuild: {\n\t\trollupOptions: {\n\t\t\tinput: {\n\t\t\t\tmain: path.resolve(__dirname, \"index.html\"),\n\t\t\t\tadmin: path.resolve(__dirname, \"admin/index.html\"),\n\t\t\t},\n\t\t},\n\t},\n\tresolve: {\n\t\talias: {\n\t\t\treact: \"preact/compat\",\n\t\t\t\"react-dom\": \"preact/compat\",\n\t\t\tutils: \"/src/utils\",\n\t\t\tsupabase: \"/admin/supabase\",\n\t\t},\n\t},\n\tcss: {\n\t\tmodules: {\n\t\t\tgenerateScopedName: generateScopedName,\n\t\t}\n\t}\n});",
+		"title": "vite配置\n"
+	}, {
+		"lang": "javascript",
+		"code": "// css-modules.config.js\nexport default {\n  generateScopedName: (localName, resourcePath, cssContent) => {\n    // 标准化路径分隔符，确保在不同操作系统上的一致性\n    const normalizedPath = resourcePath.replace(/\\\\/g, '/');\n    \n    // 提取文件名（不含扩展名）\n    const fileName = normalizedPath.split('/').pop().replace(/\\.[^/.]+$/, '');\n    \n    // 自定义哈希算法 - 确保跨平台一致性\n    const generateConsistentHash = (input, length = 5) => {\n      let hash = 0;\n      for (let i = 0; i < input.length; i++) {\n        const char = input.charCodeAt(i);\n        hash = ((hash << 5) - hash) + char;\n        // 转换为32位整数\n        hash = hash & hash;\n      }\n      \n      // 转换为base64-like字符串\n      const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';\n      let result = '';\n      let value = Math.abs(hash) || 1; // 避免0值\n      \n      do {\n        result = base64Chars[value % 64] + result;\n        value = Math.floor(value / 64);\n      } while (value > 0);\n      \n      // 确保长度一致\n      if (result.length < length) {\n        result = result.padEnd(length, 'A');\n      }\n      \n      return result.substring(0, length);\n    };\n    \n    // 使用标准化的输入生成哈希\n    const hashInput = `${normalizedPath}::${localName}`;\n    const hash = generateConsistentHash(hashInput, 5);\n    \n    return `${localName}__${hash}`;\n  }\n};",
+		"title": "css-modules.config.js\n"
+	}, {
+		"lang": "javascript",
+		"code": "/* page.module.css */\n.page-container {\n  width: 100%;\n  max-width: 1200px;\n  margin: 0 auto;\n  padding: 40px 20px;\n  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);\n  border-radius: 8px;\n}\n\n.page-title {\n  font-size: 28px;\n  color: #333;\n  margin-bottom: 30px;\n  text-align: center;\n}\n\n.button-group {\n  display: flex;\n  gap: 16px;\n  justify-content: center;\n}",
+		"title": "page.module.css文件\n"
+	}, {
+		"lang": "javascript",
+		"code": "// Page.jsx\nimport React from 'react';\nimport './page.module.css';\n\n// 无需导入 Page.css，自动关联\nconst Page = () => {\n  const handleClick = () => {\n    console.log('按钮点击');\n  };\n\n  return (\n    <div styleName=\"page-container\">\n      <h1 styleName=\"page-title\">@dr.pogodin/babel-plugin-react-css-modules 示例</h1>\n      <div styleName=\"button-group\">\n        <Button variant=\"default\" size=\"middle\" onClick={handleClick}>\n          默认按钮\n        </Button>\n        <Button variant=\"danger\" size=\"small\" onClick={handleClick}>\n          危险按钮\n        </Button>\n        <Button variant=\"primary\" size=\"large\" onClick={handleClick}>\n          主要按钮\n        </Button>\n      </div>\n    </div>\n  );\n};\n\nexport default Page;",
+		"title": "组件\n"
+	}],
+	"createTime": 1766320869354,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}, {
+	"id": "69a1a4b8cbe5c88a550175e3",
+	"title": "styled-jsx样式作用到子组件的方法",
+	"category": "#js,#react,#preact,#css",
+	"content": "",
+	"codes": [{
+		"lang": "javascript",
+		"code": "export default function MyComponent() {\n  const Test2 = () => <div className='div1'>test2</div>\n  \n  return (\n    <div>\n      <div className=\"div1\">test1</div>\n      <Test2 />\n      <style jsx>\n        {`\n          & :global(.div1) {\n            color: red;\n          }\n        `}\n      </style>\n    </div>\n  )\n}",
+		"title": "\n"
+	}],
+	"createTime": 1772201145875,
+	"updateTime": 1792832183599,
+	"isDeleted": false
+}]

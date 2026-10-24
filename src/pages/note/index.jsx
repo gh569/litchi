@@ -23,6 +23,7 @@ export default function NoteList() {
       const url = '/api/note?page=1&pageSize=' + pageSize + (keyword ? '&q=' + encodeURIComponent(keyword) : '')
       const r = await fetch(url)
       const d = await r.json()
+			console.log(d)
       setList(keyword ? d : (d.data || []))
     } catch (e) {
       setList([])

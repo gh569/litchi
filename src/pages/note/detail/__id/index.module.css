@@ -126,7 +126,7 @@
   background: #f4f6f8;
   color: #3a4150;
   border-bottom: 1px solid #e2e6eb;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -139,8 +139,9 @@
   overflow-x: auto;
   color: #e8e8e8;
   font-family: 'Consolas', 'Menlo', monospace;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.6;
+  tab-size: 2;
 }
 
 /* 演示：全屏 dialog */
