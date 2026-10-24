@@ -1,0 +1,77 @@
+import { useState, useEffect } from 'preact/hooks'
+import { Link } from 'wouter-preact'
+import style from './index.module.css'
+
+const pageSize = 50
+
+function fmtTime(t) {
+  if (!t) return ''
+  const d = new Date(t)
+  const p = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+export default function NoteList() {
+  const [list, setList] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [q, setQ] = useState('')
+
+  const load = async (keyword) => {
+    setLoading(true)
+    try {
+      const url = '/api/note?page=1&pageSize=' + pageSize + (keyword ? '&q=' + encodeURIComponent(keyword) : '')
+      const r = await fetch(url)
+      const d = await r.json()
+      setList(keyword ? d : (d.data || []))
+    } catch (e) {
+      setList([])
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => { load('') }, [])
+
+  const doSearch = (e) => { e.preventDefault(); load(q.trim()) }
+
+  return (
+    <div className={style.page}>
+      <div className={style.header}>
+        <h1 className={style.title}>编程笔记</h1>
+        <div className={style.headerRight}>
+          <form className={style.search} onSubmit={doSearch}>
+            <input
+              className={style.searchInput}
+              value={q}
+              onInput={(e) => setQ(e.target.value)}
+              placeholder="搜索标题/正文/代码…"
+            />
+            <button className={style.searchBtn} type="submit">搜索</button>
+          </form>
+          <Link href="/note/new" className={style.addBtn}>＋ 新增</Link>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className={style.empty}>加载中…</div>
+      ) : list.length === 0 ? (
+        <div className={style.empty}>还没有笔记，点右上角「＋ 新增」记录一条吧</div>
+      ) : (
+        <div className={style.list}>
+          {list.map((n) => (
+            <Link key={n.id} href={`/note/detail/${encodeURIComponent(n.id)}`} className={style.card}>
+              <div className={style.cardTitle}>
+                {n.title}
+                {n.category && <span className={style.tag}>{n.category}</span>}
+              </div>
+              {n.content && <div className={style.cardDesc}>{n.content.slice(0, 80)}</div>}
+              <div className={style.cardMeta}>
+                <span>📄 {(n.codes || []).length} 段代码</span>
+                <span>{fmtTime(n.updateTime)}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

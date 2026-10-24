@@ -1,0 +1,153 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.state {
+  text-align: center;
+  color: #999;
+  padding: 60px 0;
+  font-size: 14px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.back {
+  color: #666;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.titleRow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.title { font-size: 20px; margin: 0; word-break: break-word; }
+
+.tag {
+  background: #eef1f6;
+  color: #666;
+  border-radius: 6px;
+  padding: 1px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.editBtn {
+  padding: 6px 12px;
+  background: #f0f4ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 8px;
+  color: #1f6feb;
+  text-decoration: none;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  gap: 14px;
+  color: #999;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.content {
+  background: #fff;
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-bottom: 14px;
+}
+
+.codes { display: flex; flex-direction: column; gap: 12px; }
+
+.codeBlock {
+  background: #1e2227;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.codeBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #2a2f36;
+}
+
+.langTag {
+  background: #3a3f47;
+  color: #7fd0a5;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-family: 'Consolas', monospace;
+}
+
+.codeTitle {
+  flex: 1;
+  color: #bbb;
+  font-size: 12px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.codeActions { display: flex; gap: 6px; }
+
+.actionBtn {
+  padding: 4px 10px;
+  background: #3a3f47;
+  border: none;
+  border-radius: 6px;
+  color: #ddd;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.actionBtn:hover { background: #454b55; }
+
+.code {
+  margin: 0;
+  padding: 14px;
+  overflow-x: auto;
+  color: #e8e8e8;
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.demoMsg {
+  color: #f0b2b0;
+  font-size: 12px;
+  padding: 8px 14px;
+}
+
+.demoBox {
+  border-top: 1px solid #333;
+}
+
+.demoFrame {
+  width: 100%;
+  height: 320px;
+  border: none;
+  display: block;
+  background: #fff;
+}

@@ -54,6 +54,10 @@ export default function Home() {
           案例模块
           <span className={style['card-desc']}>案例列表、搜索、我的资料、回收站</span>
         </Link>
+        <Link href="/note" className={`${style.card} ${style['card-note']}`}>
+          编程笔记
+          <span className={style['card-desc']}>记录编程技巧，复制与演示代码</span>
+        </Link>
         <Link href="/sync-center" className={`${style.card} ${style['card-sync']}`}>
           数据同步中心
           <span className={style['card-desc']}>从 WPS 更新案例/客户/施工方/报价数据</span>

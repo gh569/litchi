@@ -1,0 +1,112 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.title { font-size: 22px; margin: 0; }
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search { display: flex; gap: 6px; }
+
+.searchInput {
+  padding: 8px 10px;
+  border: 1px solid #d9dce1;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  width: 180px;
+}
+
+.searchInput:focus { border-color: #2b6cf6; }
+
+.searchBtn {
+  padding: 8px 12px;
+  background: #f0f4ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 8px;
+  color: #1f6feb;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.addBtn {
+  display: inline-block;
+  padding: 8px 14px;
+  background: #2b6cf6;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+.card {
+  display: block;
+  background: #fff;
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 0.15s;
+}
+
+.card:hover { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); }
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.tag {
+  background: #eef1f6;
+  color: #666;
+  border-radius: 6px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.cardDesc {
+  color: #666;
+  font-size: 13px;
+  margin-top: 6px;
+  white-space: pre-wrap;
+}
+
+.cardMeta {
+  display: flex;
+  justify-content: space-between;
+  color: #999;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 60px 0;
+  font-size: 14px;
+}

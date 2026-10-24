@@ -46,6 +46,12 @@
   border: 1px solid #e9d5ff;
 }
 
+.card-note {
+  background: #f2f9f9;
+  color: #0e8a8a;
+  border: 1px solid #c2ecec;
+}
+
 .card-sync {
   background: #f0f4ff;
   color: #1f6feb;
