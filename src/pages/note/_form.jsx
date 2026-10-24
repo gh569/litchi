@@ -2,7 +2,7 @@ import { useState, useEffect } from 'preact/hooks'
 import { useParams, Link } from 'wouter-preact'
 import style from './_form.module.css'
 
-const LANGS = ['javascript', 'html', 'css', 'python', 'sql', 'shell', 'json', 'text']
+const LANGS = ['javascript', 'html','shell' /*, 'css', 'python', 'sql',  'json', 'text'*/]
 
 export default function NoteForm({ mode }) {
   const { id } = useParams()
