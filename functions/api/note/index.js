@@ -35,6 +35,15 @@ export async function onRequestGet({ env, request }) {
 
   const all = await getKV(env, SHEET);
 
+  // 导出全部有效数据
+  if (url.searchParams.get("export") === "1") {
+    const valid = all.filter((n) => n.isDeleted !== true);
+    return new Response(
+      JSON.stringify({ exportedAt: Date.now(), count: valid.length, notes: valid }),
+      { headers: CT }
+    );
+  }
+
   // 回收站列表（软删除的笔记）
   if (recycle === "1") {
     const trashed = all
@@ -87,7 +96,34 @@ export async function onRequestGet({ env, request }) {
 
 export async function onRequestPost({ env, request }) {
   const body = await readJson(request);
-  if (!body || !body.title) {
+  if (!body) {
+    return new Response(JSON.stringify({ error: "请求体为空" }), { status: 400, headers: CT });
+  }
+
+  // 批量导入（从导出的 JSON 恢复）
+  if (body.import === true && Array.isArray(body.notes)) {
+    const list = await getKV(env, SHEET);
+    const now = Date.now();
+    let imported = 0;
+    body.notes.forEach((n) => {
+      if (!n || !n.title) return;
+      list.push({
+        id: now.toString(36) + Math.random().toString(36).slice(2, 8),
+        title: String(n.title).slice(0, 300),
+        category: String(n.category || "").slice(0, 50),
+        content: String(n.content || ""),
+        codes: sanitizeCodes(n.codes),
+        createTime: n.createTime || now,
+        updateTime: n.updateTime || now,
+        isDeleted: false,
+      });
+      imported++;
+    });
+    await saveKV(env, SHEET, list);
+    return new Response(JSON.stringify({ ok: true, imported }), { headers: CT });
+  }
+
+  if (!body.title) {
     return new Response(JSON.stringify({ error: "缺少标题 title" }), {
       status: 400,
       headers: CT,

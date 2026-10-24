@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'preact/hooks'
 import { Link } from 'wouter-preact'
+import { supabase } from '../../../lib/supabase'
 import style from './index.module.css'
 
 function fmtTime(t) {
@@ -12,6 +13,12 @@ function fmtTime(t) {
 export default function RecycleBin() {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authNote, setAuthNote] = useState(null)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [authErr, setAuthErr] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -37,12 +44,30 @@ export default function RecycleBin() {
     } catch (e) { alert('恢复失败') }
   }
 
-  const hardDel = async (n) => {
-    if (!window.confirm(`彻底删除「${n.title}」？此操作不可恢复`)) return
+  const openAuth = (n) => {
+    setAuthNote(n)
+    setEmail('')
+    setPassword('')
+    setAuthErr('')
+    setAuthOpen(true)
+  }
+
+  const confirmDel = async () => {
+    if (!email.trim() || !password) { setAuthErr('请输入邮箱和密码'); return }
+    setDeleting(true)
+    setAuthErr('')
     try {
-      await fetch(`/api/note?id=${encodeURIComponent(n.id)}&hard=1`, { method: 'DELETE' })
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (error) { setAuthErr('邮箱或密码错误，无法删除'); setDeleting(false); return }
+      await fetch(`/api/note?id=${encodeURIComponent(authNote.id)}&hard=1`, { method: 'DELETE' })
+      setDeleting(false)
+      setAuthOpen(false)
+      setAuthNote(null)
       load()
-    } catch (e) { alert('删除失败') }
+    } catch (e) {
+      setAuthErr('验证失败，请稍后重试')
+      setDeleting(false)
+    }
   }
 
   return (
@@ -72,10 +97,42 @@ export default function RecycleBin() {
               </div>
               <div className={style.actions}>
                 <button className={style.restoreBtn} onClick={() => restore(n)}>恢复</button>
-                <button className={style.hardBtn} onClick={() => hardDel(n)}>彻底删除</button>
+                <button className={style.hardBtn} onClick={() => openAuth(n)}>彻底删除</button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {authOpen && (
+        <div className={style.overlay} onClick={(e) => { if (e.target === e.currentTarget && !deleting) setAuthOpen(false) }}>
+          <div className={style.dialog}>
+            <h3 className={style.dialogTitle}>确认彻底删除</h3>
+            <p className={style.dialogDesc}>删除「{authNote && authNote.title}」将无法恢复。请输入账号密码确认。</p>
+            <input
+              className={style.input}
+              type="email"
+              value={email}
+              onInput={(e) => setEmail(e.target.value)}
+              placeholder="登录邮箱"
+              autoComplete="username"
+            />
+            <input
+              className={style.input}
+              type="password"
+              value={password}
+              onInput={(e) => setPassword(e.target.value)}
+              placeholder="密码"
+              autoComplete="current-password"
+            />
+            {authErr && <div className={style.err}>{authErr}</div>}
+            <div className={style.dialogBtns}>
+              <button className={style.cancelBtn} onClick={() => !deleting && setAuthOpen(false)} disabled={deleting}>取消</button>
+              <button className={style.confirmBtn} onClick={confirmDel} disabled={deleting}>
+                {deleting ? '验证删除中…' : '确认删除'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

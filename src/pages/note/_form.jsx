@@ -12,6 +12,7 @@ export default function NoteForm({ mode }) {
   const [codes, setCodes] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [fullEdit, setFullEdit] = useState(null) // {index, value} 全屏编辑代码
 
   useEffect(() => {
     if (mode === 'edit' && id && id !== ':id') {
@@ -32,6 +33,13 @@ export default function NoteForm({ mode }) {
   const addCode = () => setCodes([...codes, { lang: 'javascript', title: '', code: '' }])
   const updateCode = (i, patch) => setCodes(codes.map((c, idx) => (idx === i ? { ...c, ...patch } : c)))
   const removeCode = (i) => setCodes(codes.filter((_, idx) => idx !== i))
+
+  const openFull = (i) => setFullEdit({ index: i, value: codes[i].code })
+  const saveFull = () => {
+    if (!fullEdit) return
+    updateCode(fullEdit.index, { code: fullEdit.value })
+    setFullEdit(null)
+  }
 
   const save = async () => {
     if (!title.trim()) { setError('请输入标题'); return }
@@ -83,22 +91,27 @@ export default function NoteForm({ mode }) {
             <select className={style.langSelect} value={c.lang} onChange={(e) => updateCode(i, { lang: e.target.value })}>
               {LANGS.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
-            <input
-              className={style.codeTitle}
-              value={c.title}
-              onInput={(e) => updateCode(i, { title: e.target.value })}
-              placeholder="代码片段说明（可选）"
-            />
             <button className={style.removeBtn} onClick={() => removeCode(i)}>删除</button>
           </div>
+          <label className={style.subLabel}>代码片段说明</label>
           <textarea
-            className={style.codeArea}
-            value={c.code}
-            onInput={(e) => updateCode(i, { code: e.target.value })}
-            rows={8}
-            placeholder="粘贴代码…"
-            spellcheck={false}
+            className={style.codeTitle}
+            value={c.title}
+            onInput={(e) => updateCode(i, { title: e.target.value })}
+            rows={2}
+            placeholder="这段代码是做什么的（可多行）…"
           />
+          <div className={style.codeAreaWrap}>
+            <textarea
+              className={style.codeArea}
+              value={c.code}
+              onInput={(e) => updateCode(i, { code: e.target.value })}
+              rows={10}
+              placeholder="粘贴代码…"
+              spellcheck={false}
+            />
+            <button className={style.fullBtn} onClick={() => openFull(i)}>⛶ 全屏编辑</button>
+          </div>
         </div>
       ))}
 
@@ -107,6 +120,27 @@ export default function NoteForm({ mode }) {
       <button className={style.saveBtn} onClick={save} disabled={saving}>
         {saving ? '保存中…' : '保存笔记'}
       </button>
+
+      {fullEdit && (
+        <div className={style.fullOverlay} onClick={(e) => { if (e.target === e.currentTarget) setFullEdit(null) }}>
+          <div className={style.fullBox}>
+            <div className={style.fullBar}>
+              <span className={style.fullTitle}>全屏编辑代码</span>
+              <div className={style.fullBtns}>
+                <button className={style.fullCancel} onClick={() => setFullEdit(null)}>取消</button>
+                <button className={style.fullOk} onClick={saveFull}>完成</button>
+              </div>
+            </div>
+            <textarea
+              className={style.fullArea}
+              value={fullEdit.value}
+              onInput={(e) => setFullEdit({ ...fullEdit, value: e.target.value })}
+              spellcheck={false}
+              autoFocus
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
