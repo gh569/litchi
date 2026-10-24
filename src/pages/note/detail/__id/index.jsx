@@ -59,6 +59,7 @@ function CodeBlock({ block }) {
 
   return (
     <div className={style.codeBlock}>
+      {block.title && <div className={style.codeTitle}>{block.title}</div>}
       <div className={style.codeHead}>
         <div className={style.langTag}>{lang}</div>
         <div className={style.codeActions}>
@@ -70,7 +71,6 @@ function CodeBlock({ block }) {
           )}
         </div>
       </div>
-      {block.title && <div className={style.codeTitle}>{block.title}</div>}
       <pre className={style.code}><code>{block.code}</code></pre>
 
       {demoOpen && (

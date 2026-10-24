@@ -19,7 +19,19 @@
   white-space: nowrap;
 }
 
-.title { font-size: 20px; margin: 0; }
+.title { font-size: 20px; margin: 0; flex: 1; min-width: 0; }
+
+.barAddBtn {
+  padding: 8px 14px;
+  background: #2b6cf6;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
 
 .label {
   display: block;
@@ -53,16 +65,13 @@
 }
 
 .codesHeader {
-  position: sticky;
-  top: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  padding: 8px 0;
   margin: 12px 0 0;
-  z-index: 5;
 }
+
+.codesHeader .label { margin: 0; }
 
 .addCodeBtn {
   padding: 8px 14px;

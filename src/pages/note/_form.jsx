@@ -67,6 +67,7 @@ export default function NoteForm({ mode }) {
       <div className={style.bar}>
         <Link href="/note" className={style.back}>← 返回</Link>
         <h1 className={style.title}>{mode === 'edit' ? '编辑笔记' : '新增笔记'}</h1>
+        <button className={style.barAddBtn} onClick={addCode}>＋ 添加代码</button>
       </div>
 
       <label className={style.label}>标题</label>
@@ -80,7 +81,6 @@ export default function NoteForm({ mode }) {
 
       <div className={style.codesHeader}>
         <span className={style.label}>代码块</span>
-        <button className={style.addCodeBtn} onClick={addCode}>＋ 添加代码</button>
       </div>
 
       {codes.length === 0 && <div className={style.hint}>还没有代码块，点「＋ 添加代码」加入</div>}

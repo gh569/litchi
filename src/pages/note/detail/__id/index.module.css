@@ -123,9 +123,11 @@
 
 .codeTitle {
   padding: 8px 14px;
-  background: #24282e;
-  color: #cfd6e0;
+  background: #f4f6f8;
+  color: #3a4150;
+  border-bottom: 1px solid #e2e6eb;
   font-size: 13px;
+  font-weight: 500;
   line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
