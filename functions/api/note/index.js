@@ -31,9 +31,19 @@ export async function onRequestGet({ env, request }) {
   const id = url.searchParams.get("id");
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
   const pageSize = Math.max(1, parseInt(url.searchParams.get("pageSize") || "20", 10));
+  const recycle = url.searchParams.get("recycle");
 
-  let list = await getKV(env, SHEET);
-  list = list.filter((n) => n.isDeleted !== true);
+  const all = await getKV(env, SHEET);
+
+  // 回收站列表（软删除的笔记）
+  if (recycle === "1") {
+    const trashed = all
+      .filter((n) => n.isDeleted === true)
+      .sort((a, b) => (b.deletedAt || b.updateTime || 0) - (a.deletedAt || a.updateTime || 0));
+    return new Response(JSON.stringify(trashed), { headers: CT });
+  }
+
+  let list = all.filter((n) => n.isDeleted !== true);
 
   // 搜索：标题/正文/代码
   if (q) {
@@ -116,6 +126,14 @@ export async function onRequestPut({ env, request }) {
       headers: CT,
     });
   }
+  // 恢复（从回收站还原）
+  if (body.restore === true) {
+    list[idx].isDeleted = false;
+    list[idx].deletedAt = null;
+    list[idx].updateTime = Date.now();
+    await saveKV(env, SHEET, list);
+    return new Response(JSON.stringify({ ok: true, id: list[idx].id, restored: true }), { headers: CT });
+  }
   const prev = list[idx];
   list[idx] = {
     ...prev,
@@ -146,8 +164,14 @@ export async function onRequestDelete({ env, request }) {
       headers: CT,
     });
   }
-  list[idx].isDeleted = true;
-  list[idx].deletedAt = Date.now();
+  if (url.searchParams.get("hard") === "1") {
+    // 彻底删除（物理移除）
+    list.splice(idx, 1);
+  } else {
+    // 软删除 → 回收站
+    list[idx].isDeleted = true;
+    list[idx].deletedAt = Date.now();
+  }
   await saveKV(env, SHEET, list);
   return new Response(JSON.stringify({ ok: true }), { headers: CT });
 }

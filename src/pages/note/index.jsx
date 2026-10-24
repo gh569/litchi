@@ -33,11 +33,24 @@ export default function NoteList() {
 
   const doSearch = (e) => { e.preventDefault(); load(q.trim()) }
 
+  const del = async (n, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!window.confirm(`删除笔记「${n.title}」？可在回收站找回`)) return
+    try {
+      await fetch(`/api/note?id=${encodeURIComponent(n.id)}`, { method: 'DELETE' })
+      load(q.trim())
+    } catch (err) {
+      alert('删除失败，请稍后重试')
+    }
+  }
+
   return (
     <div className={style.page}>
       <div className={style.header}>
         <h1 className={style.title}>编程笔记</h1>
         <div className={style.headerRight}>
+          <Link href="/note/recycle-bin" className={style.trashBtn}>🗑 回收站</Link>
           <form className={style.search} onSubmit={doSearch}>
             <input
               className={style.searchInput}
@@ -58,17 +71,20 @@ export default function NoteList() {
       ) : (
         <div className={style.list}>
           {list.map((n) => (
-            <Link key={n.id} href={`/note/detail/${encodeURIComponent(n.id)}`} className={style.card}>
-              <div className={style.cardTitle}>
-                {n.title}
-                {n.category && <span className={style.tag}>{n.category}</span>}
-              </div>
-              {n.content && <div className={style.cardDesc}>{n.content.slice(0, 80)}</div>}
-              <div className={style.cardMeta}>
-                <span>📄 {(n.codes || []).length} 段代码</span>
-                <span>{fmtTime(n.updateTime)}</span>
-              </div>
-            </Link>
+            <div key={n.id} className={style.card}>
+              <Link href={`/note/detail/${encodeURIComponent(n.id)}`} className={style.cardMain}>
+                <div className={style.cardTitle}>
+                  {n.title}
+                  {n.category && <span className={style.tag}>{n.category}</span>}
+                </div>
+                {n.content && <div className={style.cardDesc}>{n.content.slice(0, 80)}</div>}
+                <div className={style.cardMeta}>
+                  <span>📄 {(n.codes || []).length} 段代码</span>
+                  <span>{fmtTime(n.updateTime)}</span>
+                </div>
+              </Link>
+              <button className={style.delBtn} title="删除" onClick={(e) => del(n, e)}>删除</button>
+            </div>
           ))}
         </div>
       )}
